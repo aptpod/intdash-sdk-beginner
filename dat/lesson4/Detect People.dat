@@ -1,0 +1,4 @@
+@version 2.0
+{"version":2,"name":"Detect People","_type":"group.v2"}
+{"id":"Detect people","displayName":"","description":"","targetData":{"version":2,"data":{"dataType":{"preset":true,"body":"h264_frame"},"dataName":{"prefix":"10/","body":"h264"}}},"conversionSettings":{"type":"none"},"displaySettings":{"type":"none"},"_type":"data.v2"}
+{"id":"Count","displayName":"","description":"","targetData":{"version":2,"data":{"dataType":{"preset":true,"body":"int64"},"dataName":{"prefix":"11/","body":"detect_count"}}},"conversionSettings":{"type":"as_number","data":{"offsetFactor":0,"scaleFactor":1}},"displaySettings":{"type":"number","data":{"unit":"persons","rangeMin":0,"rangeMax":40,"numberOfDigitsAfterDecimalPoint":0,"thresholdLower":null,"thresholdUpper":null}},"_type":"data.v2"}
