@@ -1,3 +1,6 @@
 intdash/
 gen/
 venv/
+
+*.pyc
+__pycache__/
