@@ -32,4 +32,4 @@ python lesson4/src/detect_people.py  --api_url https://example.intdash.jp --api_
 - Data Name: `1/h264`
 
 ### 可視化
-Data Visualizerに[Datファイル](../dat/lesson4/Detect%20People.dat)をインポート
+Data Visualizerに[Datファイル](../dat/Detect%20People.dat)をインポート
