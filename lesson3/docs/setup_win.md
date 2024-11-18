@@ -1,59 +1,55 @@
-# SDK入門③〜RTSPで映像配信するぞ〜
-
-映像データをダウンストリームしてRTSPで配信します。
-
-![アーキテクチャ](../assets/lesson3/arch.png)
-
-## 依存関係
-- iscp>=1.0.0
+# Windows
 
 ## インストール
 
 ### クライアントライブラリインストール
-```sh
+
+```powershell
 pip install iscp
 ```
 
 ### FFmpegインストール
-#### Mac
-```sh
-brew install ffmpeg
+[FFmpeg公式サイト](https://ffmpeg.org/download.html)からWindows用のバイナリをダウンロードします。<br>
+例: ffmpeg-release-full.7z
+
+展開して任意のフォルダに配置します。<br>
+例: C:¥ffmpeg-7.0.2
+
+インストール先のパスを環境変数Pathに追加します。<br>
+例: C:¥ffmpeg-7.0.2
+
+
+```powershell
 ffmpeg -version
 ```
-#### Ubuntu
-WiP
-
-#### Windows
-WiP
-
 
 ### MediaMTXインストール
 [MediaMTX](https://github.com/bluenviron/mediamtx?tab=readme-ov-file#installation)のバイナリ（.tar.gz）をダウンロードして展開します。
-
+例: mediamtx_v1.9.3_windows_amd64.zip
 
 設定ファイル`mediamtx.yml`を編集して、送信するデータに合わせてFPS設定を変えておきます。
 
-```sh
+```powershell
   rpiCameraFPS: 15
 ```
 
 ## 実行
 
 ### MediaMTX
-WiP:Windowsはことならないか
-```sh
-./mediamtx 
+```powershell
+cd /path/to/yml_directory
+mediamtx
 ```
 
 ### PYTHONPATH設定
-```sh
-echo $PYTHONPATH
-export PYTHONPATH=/path/to/your_workspace/intdash:
+```powershell
+echo $env:PYTHONPATH
+$env:PYTHONPATH = "/path/to/your_workspace;"
 ```
 
 ### サンプルプログラム
-```sh
-python lesson3/rtsp_stream.py  --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID>
+```powershell
+python lesson3/src/rtsp_stream.py  --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID>
 ```
 
 ### 収集開始
@@ -63,10 +59,6 @@ python lesson3/rtsp_stream.py  --api_url https://example.intdash.jp --api_token 
 - Data Name: `1/h264`
 
 ### ffplay
-```sh
+```powershell
 ffplay -window_title "After RTSP" rtsp://localhost:8554/stream
 ```
-
-## 詳細
-- [SDK入門③〜RTSPで映像配信するぞ〜](https://tech.aptpod.co.jp/draft/entry/53b4Eo4YZD2Da0vuyVJoYmRyN-U) 
-

@@ -5,10 +5,10 @@ import traceback
 
 from intdash import ApiClient
 from intdash.configuration import Configuration
-from lesson2.distance.calculator.distance_calculator import DistanceCalculator
-from lesson2.distance.reader.measurement_reader import MeasurementReader
-from lesson2.distance.service.distance_service import DistanceService
-from lesson2.distance.writer.measurement_writer import MeasurementWriter
+from lesson2.distance.src.calculator.distance_calculator import DistanceCalculator
+from lesson2.distance.src.reader.measurement_reader import MeasurementReader
+from lesson2.distance.src.service.distance_service import DistanceService
+from lesson2.distance.src.writer.measurement_writer import MeasurementWriter
 
 # ログ設定
 logging.basicConfig(

@@ -8,12 +8,12 @@ import iscp
 
 from intdash.api_client import ApiClient
 from intdash.configuration import Configuration
-from lesson4.convertor.convertor import Convertor
-from lesson4.detector.detector import Detector
-from lesson4.downstreamer.downstreamer import Downstreamer
-from lesson4.service.detect_service import DetectService
-from lesson4.upstreamer.upstreamer import Upstreamer
-from lesson4.writer.measurement_writer import MeasurementWriter
+from lesson4.src.convertor.convertor import Convertor
+from lesson4.src.detector.detector import Detector
+from lesson4.src.downstreamer.downstreamer import Downstreamer
+from lesson4.src.service.detect_service import DetectService
+from lesson4.src.upstreamer.upstreamer import Upstreamer
+from lesson4.src.writer.measurement_writer import MeasurementWriter
 
 # ログ設定
 logging.basicConfig(
@@ -31,9 +31,9 @@ TARGET_SIZE = 640, 480
 FPS = 15
 BITRATE = 3000  # kbps
 KEY_INT_MAX = 30
-WEIGHTS_PATH = "./lesson4/yolov4-tiny.weights"
-CONFIG_PATH = "./lesson4/yolov4-tiny.cfg"
-NAMES_PATH = "./lesson4/coco.names"
+WEIGHTS_PATH = "./lesson4/config/yolov4-tiny.weights"
+CONFIG_PATH = "./lesson4/config/yolov4-tiny.cfg"
+NAMES_PATH = "./lesson4/config/coco.names"
 
 
 # GStreame H.264デコードパイプライン

@@ -4,3 +4,11 @@ venv/
 
 *.pyc
 __pycache__/
+.mypy_cache/
+
+openapitools.json
+.openapi-generator/
+intdash_README.md
+
+proto
+buf.gen.yaml
