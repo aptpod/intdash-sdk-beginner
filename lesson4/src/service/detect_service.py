@@ -42,12 +42,12 @@ class DetectService:
         self.elapsed_time_queue: asyncio.Queue[int] = asyncio.Queue()
         self.count_queue: asyncio.Queue[int] = asyncio.Queue()
 
-    async def start(self, read_timeout: int = 60) -> None:
+    async def start(self, read_timeout: float = 60) -> None:
         """
         開始
 
         Args:
-            read_timeout (int): ダウンストリームタイムアウト (秒)
+            read_timeout (float): ダウンストリームタイムアウト (秒)
 
         検出後データ用計測作成
         ダウンストリーム開始、アップストリーム開始
@@ -88,7 +88,7 @@ class DetectService:
             await asyncio.gather(basetime_task, feed_task, detect_task, fetch_task)
         except TimeoutError:
             self.writer.complete_measurement(measurement.uuid)
-            logging.info("Completed measurement {measurement.uuid}")
+            logging.info(f"Completed measurement {measurement.uuid}")
 
     async def basetime(self, measurement_uuid: str) -> None:
         """
@@ -106,12 +106,12 @@ class DetectService:
             await self.upstreamer.send_basetime(basetime)
             logging.info(f"Sent basetime {basetime.name} {basetime.base_time}")
 
-    async def feed(self, read_timeout: int) -> None:
+    async def feed(self, read_timeout: float) -> None:
         """
         H.264データ供給
 
         Args:
-            read_timeout (int): ダウンストリームタイムアウト (秒)
+            read_timeout (float): ダウンストリームタイムアウト (秒)
 
         - H.264データダウンストリーム
         - 基準時刻キュー追加
