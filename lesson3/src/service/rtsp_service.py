@@ -65,8 +65,9 @@ class RtspService:
         H.264データ供給
 
         - H.264データダウンストリーム
-        - 基準時刻キュー追加
-        - デコーダー入力
+        - 遅延ロガー出力
+        - RTSPストリーム
+        - ffplay入力
         """
         if not self.rtsp_process.stdin or not self.ffplay_process.stdin:
             raise
