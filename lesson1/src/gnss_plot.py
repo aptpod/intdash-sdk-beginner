@@ -33,7 +33,7 @@ CIRCLE_OPACITY = 0.8
 SAMPLE_INTERVAL = 600  # 1/1sec > 1/10min
 CMAP = plt.get_cmap("jet")
 NORM = mcolors.Normalize(vmin=0, vmax=250)
-LIMIT = 1000
+LIMIT = 10
 
 
 def get_client(api_url: str, api_token: str) -> ApiClient:

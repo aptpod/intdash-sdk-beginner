@@ -1,8 +1,8 @@
 import logging
 
-from lesson2.distance.calculator.distance_calculator import DistanceCalculator
-from lesson2.distance.reader.measurement_reader import MeasurementReader
-from lesson2.distance.writer.measurement_writer import MeasurementWriter
+from lesson2.distance.src.calculator.distance_calculator import DistanceCalculator
+from lesson2.distance.src.reader.measurement_reader import MeasurementReader
+from lesson2.distance.src.writer.measurement_writer import MeasurementWriter
 
 
 class DistanceService:

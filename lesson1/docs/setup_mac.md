@@ -1,46 +1,19 @@
-# SDK入門①〜社用車で走ったとこ全部見せます〜
-
-複数エッジのすべての過去計測のGPSデータを取得して地図上にプロットします。
-
-![アーキテクチャ](../assets/lesson1/arch.png)
-
-![地図](../assets/lesson1/map.png)
-
-
-## 依存関係
-- REST API用intdash SDK for Python>=v2.7.0
-- pydantic>=2.9.2
-- python-dateutil>=2.9.0.post0
-- urllib3>=2.2.3
-- folium>=0.18.0
-- matplotlib>=3.9.2
+# Mac
 
 ## インストール
 
 ### Javaインストール
 
-#### Mac
 ```sh
 brew install openjdk
 java --version
 ```
-
-#### Ubuntu
-WiP
-
-#### Windows
-WiP
 
 ### npmインストール
 ```sh
 brew install node
 npm -v
 ```
-#### Ubuntu
-WiP
-
-#### Windows
-WiP
 
 ### OpenAPI Generatorインストール
 ```sh
@@ -65,17 +38,10 @@ ls -l intdash
 
 ### Pythonインストール
 
-#### Mac
 ```sh
 brew install python
 python --version
 ```
-#### Ubuntu
-WiP
-
-#### Windows
-WiP
-
 ### Python仮想環境作成
 ```sh
 python3.xx -m venv venv
@@ -97,14 +63,10 @@ pip install folium matplotlib
 ### PYTHONPATH設定
 ```sh
 echo $PYTHONPATH
-export PYTHONPATH=/path/to/your_workspace/intdash:
+export PYTHONPATH=/path/to/your_workspace:
 ```
 
-### 実行
+### サンプルプログラム実行
 ```sh
-python lesson1/gnss_plot.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuids <YOUR_EDGE_UUID1> <YOUR_EDGE_UUID2> <YOUR_EDGE_UUID3>
+python lesson1/src/gnss_plot.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuids <YOUR_EDGE_UUID1> <YOUR_EDGE_UUID2> <YOUR_EDGE_UUID3>
 ```
-
-## 詳細
-- [SDK入門①〜社用車で走ったとこ全部見せます〜](https://tech.aptpod.co.jp/draft/entry/fnyO710T6NyH29d8ehKXgKYDh48) 
-
