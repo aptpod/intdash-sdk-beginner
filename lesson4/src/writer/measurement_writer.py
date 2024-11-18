@@ -70,4 +70,3 @@ class MeasurementWriter:
         api.complete_project_measurement(
             measurement_uuid=measurement_uuid, project_uuid=self.project_uuid
         )
-        logging.info(f"Completed measurement: {measurement_uuid}")
