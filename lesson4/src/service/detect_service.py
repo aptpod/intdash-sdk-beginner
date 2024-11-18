@@ -1,11 +1,11 @@
 import asyncio
 import logging
 
-from lesson4.convertor.convertor import Convertor
-from lesson4.detector.detector import Detector
-from lesson4.downstreamer.downstreamer import Downstreamer
-from lesson4.upstreamer.upstreamer import Upstreamer
-from lesson4.writer.measurement_writer import MeasurementWriter
+from lesson4.src.convertor.convertor import Convertor
+from lesson4.src.detector.detector import Detector
+from lesson4.src.downstreamer.downstreamer import Downstreamer
+from lesson4.src.upstreamer.upstreamer import Upstreamer
+from lesson4.src.writer.measurement_writer import MeasurementWriter
 
 
 class DetectService:
