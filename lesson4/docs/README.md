@@ -2,9 +2,9 @@
 
 ダウンストリームして物体検出した映像データをアップストリームします。
 
-![アーキテクチャ](../assets/lesson4/arch.png)
+![アーキテクチャ](../images/arch.png)
 
-![処理構成図](../assets/lesson4/service.png)
+![処理構成図](../images/service.png)
 
 ## 依存関係
 - REST API用intdash SDK for Python>=v2.7.0
