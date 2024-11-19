@@ -19,6 +19,7 @@ class DetectService:
         decoder (Convertor): デコーダー
         detector (Detector): 物体検出器
         encoder (Convertor): エンコーダー
+        writer (MeasurementWriter): 計測作成
         upstreamer (Upstreamer): アップストリーマー
         elapsed_time_queue (Queue): 基準時刻キュー
         count_queue (Queue): 検出数キュー
@@ -166,7 +167,7 @@ class DetectService:
         """
         終了
         """
-        self.encoder.stop()
         self.decoder.stop()
-        await self.upstreamer.close()
+        self.encoder.stop()
         await self.downstreamer.close()
+        await self.upstreamer.close()
