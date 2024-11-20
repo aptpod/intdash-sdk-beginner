@@ -58,7 +58,7 @@ class Detector:
             frame (bytes): 元フレーム
 
         Returns:
-            tuple(bytes, int): 矩形描画後フレーム, 検出人数
+            tuple(bytes, int): 矩形描画後フレーム(BGR), 検出人数
         """
 
         # 準備
