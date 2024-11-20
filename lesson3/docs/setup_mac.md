@@ -46,8 +46,10 @@ python lesson3/src/rtsp_stream.py  --api_url https://example.intdash.jp --api_to
 ### 収集開始
 [intdash Motion V2](https://apps.apple.com/in/app/intdash-motion-v2/id1632857226)でデータ収集を開始します。
 
-- Data Type: `h264_frame`
-- Data Name: `1/h264`
+- Video
+  - <YOUR_EDGE_UUID>
+  - Data Type: `h264_frame`
+  - Data Name: `1/h264`
 
 ### ffplay
 ```sh
