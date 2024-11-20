@@ -1,3 +1,3 @@
 # Windows 
 
-WiP
+WiP: PyGObjectインストール方法調査中

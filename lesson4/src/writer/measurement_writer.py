@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime, timezone
 
 from intdash.api import (
@@ -54,7 +53,6 @@ class MeasurementWriter:
         measurement = api.create_project_measurement(
             self.project_uuid, meas_create=meas_create
         )
-        logging.info(f"Created measurement: {measurement.uuid} basetime {basetime}")
         return measurement
 
     def complete_measurement(self, measurement_uuid: str) -> None:

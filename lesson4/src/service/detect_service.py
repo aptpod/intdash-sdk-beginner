@@ -65,13 +65,11 @@ class DetectService:
             - 基準時刻キューから基準時刻を取得
             - エンコードされたH.264データをアップストリーム
             - 検出人数をアップストリーム
-
-        Raises:
-            TimeoutError: データチャンク受信のタイムアウト時
+        データチャンク受信のタイムアウト時に計測完了
         """
         try:
             measurement = self.writer.create_measurement("Created by DetectService")
-            logging.info("Created measurement {measurement.uuid}")
+            logging.info(f"Created measurement: {measurement.uuid}")
 
             await self.downstreamer.open()
             await self.upstreamer.open(measurement.uuid)
@@ -89,7 +87,7 @@ class DetectService:
             await asyncio.gather(basetime_task, feed_task, detect_task, fetch_task)
         except TimeoutError:
             self.writer.complete_measurement(measurement.uuid)
-            logging.info(f"Completed measurement {measurement.uuid}")
+            logging.info(f"Completed measurement: {measurement.uuid}")
 
     async def basetime(self, measurement_uuid: str) -> None:
         """

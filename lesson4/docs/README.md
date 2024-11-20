@@ -11,8 +11,6 @@
 - pydantic>=2.9.2
 - python-dateutil>=2.9.0.post0
 - urllib3>=2.2.3
-- Protocol Buffersエンコーダー==intdash.v1
-- protobuf>=5.28.3
 - iscp>=1.0.0
 - opencv-python>=4.10.0.84
 - numpy>=2.1.3
