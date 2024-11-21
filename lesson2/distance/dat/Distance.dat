@@ -1,0 +1,3 @@
+@version 2.0
+{"version":2,"name":"Distance","_type":"group.v2"}
+{"id":"distance","displayName":"","description":"","targetData":{"version":2,"data":{"dataType":{"preset":true,"body":"float64"},"dataName":{"prefix":"10/","body":"distance"}}},"conversionSettings":{"type":"as_number","data":{"offsetFactor":0,"scaleFactor":1}},"displaySettings":{"type":"number","data":{"unit":"km","rangeMin":0,"rangeMax":250,"numberOfDigitsAfterDecimalPoint":2,"thresholdLower":null,"thresholdUpper":null}},"_type":"data.v2"}
