@@ -84,4 +84,4 @@ python lesson2/distance/src/distance.py --api_url https://example.intdash.jp --a
 
 ### 可視化
 - GPS距離算出
-Data Visualizerに[Datファイル](../../dat/lesson2/Distance.dat)をインポート
+Data Visualizerに[Datファイル](../distance/dat/Distance.dat)をインポート
