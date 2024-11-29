@@ -15,5 +15,5 @@
 - [Windows](./setup_win.md)
 
 ## 詳細
-- [SDK入門③〜RTSPで映像配信するぞ〜](https://tech.aptpod.co.jp/draft/entry/53b4Eo4YZD2Da0vuyVJoYmRyN-U) 
+- [SDK入門③〜RTSPで映像配信するぞ〜](https://tech.aptpod.co.jp/entry/2024/11/28/120000) 
 

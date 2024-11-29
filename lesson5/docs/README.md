@@ -1,10 +1,8 @@
-# SDK入門④〜YOLOで物体検知しちゃう〜
+# SDK入門⑤〜iPadでData Visualizerを見る会〜
 
-ダウンストリームして物体検出した映像データをアップストリームします。
+PCの画面キャプチャしてアップストリームします。
 
 ![アーキテクチャ](../images/arch.png)
-
-![処理構成図](../images/service.png)
 
 ## 依存関係
 - REST API用intdash SDK for Python>=v2.7.0
@@ -24,5 +22,5 @@
 - [Windows](./setup_win.md)
 
 ## 詳細
-- [SDK入門④〜YOLOで物体検知しちゃう〜](https://tech.aptpod.co.jp/entry/2024/11/29/160000) 
+- [SDK入門⑤〜iPadでData Visualizerを見る会〜](https://tech.aptpod.co.jp/draft/entry/aIaOSyxvbPksHf7xjyzLhnTn6r4) 
 

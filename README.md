@@ -9,6 +9,7 @@ intdash SDK for Python 入門のサンプルプログラム集です。
 - [SDK入門②〜データ移行ツールの作り方〜](./lesson2/docs/README.md) 
 - [SDK入門③〜RTSPで映像配信するぞ〜](./lesson3/docs/README.md)
 - [SDK入門④〜YOLOで物体検知しちゃう〜](./lesson4/docs/README.md)
+- [SDK入門⑤〜iPadでData Visualizerを見る会〜](./lesson5/docs/README.md)
 
 ## インストール
 ```

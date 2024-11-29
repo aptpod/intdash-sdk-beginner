@@ -22,5 +22,5 @@
 - [Windows](./setup_win.md)
 
 ## 詳細
-- [SDK入門①〜社用車で走ったとこ全部見せます〜](https://tech.aptpod.co.jp/draft/entry/fnyO710T6NyH29d8ehKXgKYDh48) 
+- [SDK入門①〜社用車で走ったとこ全部見せます〜](https://tech.aptpod.co.jp/entry/2024/11/25/170000) 
 
