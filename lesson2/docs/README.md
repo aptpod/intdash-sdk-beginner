@@ -28,5 +28,5 @@
 - [Windows](./setup_win.md)
 
 ## 詳細
-- [SDK入門②〜データ移行ツールの作り方〜](https://tech.aptpod.co.jp/draft/entry/HEcpETLMen5HLiHhUngqNgaHwIE)
+- [SDK入門②〜データ移行ツールの作り方〜](https://tech.aptpod.co.jp/entry/2024/11/27/160000)
 
