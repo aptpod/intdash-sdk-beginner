@@ -95,7 +95,6 @@ class CaptureService:
         - H.264データアップストリーム
         """
 
-        logging.info("start fetch")
         start = iscp.DateTime.utcnow()
         while True:
             frame = await self.encoder.get()
