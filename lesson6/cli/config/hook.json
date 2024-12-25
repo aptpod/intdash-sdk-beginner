@@ -1,0 +1,10 @@
+{
+    "url": "https://example.execute-api.ap-northeast-1.amazonaws.com/webhook",
+    "secret": "stringstringstringstringstringst",
+    "edges_event": false,
+    "measurements_event": true,
+    "users_event": false,
+    "edge_connections_event": false,
+    "project_edges_event": false,
+    "project_members_event": false
+}
