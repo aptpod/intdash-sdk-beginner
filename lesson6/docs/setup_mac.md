@@ -9,7 +9,6 @@ pip install boto3 requests pytest
 ## AWS構築
 ### カスタムLambdaレイヤー作成（手動）
 #### 依存パッケージインストール
-
 ```sh
 mkdir -p path/to/workdir
 cd path/to/workdir
@@ -22,7 +21,7 @@ pip install protobuf
 #### ZIPファイル作成
 ```sh
 mkdir -p python/lib/python3.12/site-packages
-cd path/to//intdash-sdk-workspace
+cd path/to/intdash-sdk-workspace
 cp -r intdash gen path/to/workdir/venv/lib/python3.12/site-packages/* path/to/python/lib/python3.12/site-packages
 cd path/to/workdir
 find . -name "*.pyc" -delete
@@ -165,7 +164,7 @@ pytest -v -p no:warnings lesson6/intdash-distance/test/test_lambda_function.py
 ##### 計測完了
 Motionのデータ収集を停止します。
 
-Slack通知されるData Visualizerのリンクをクリックします。
-
 ### 可視化
 Data Visualizerに[Datファイル](../intdash-distance/dat/Distance.dat)をインポート
+
+Slack通知のData Visualizerのリンクをクリック
