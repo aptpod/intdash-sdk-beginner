@@ -22,5 +22,5 @@ PCの画面キャプチャしてアップストリームします。
 - [Windows](./setup_win.md)
 
 ## 詳細
-- [SDK入門⑤〜iPadでData Visualizerを見る会〜](https://tech.aptpod.co.jp/draft/entry/aIaOSyxvbPksHf7xjyzLhnTn6r4) 
+- [SDK入門⑤〜iPadでData Visualizerを見る会〜](https://tech.aptpod.co.jp/entry/2024/12/20/100000) 
 

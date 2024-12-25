@@ -6,10 +6,9 @@ import sys
 import urllib.parse
 
 import iscp
-
-from lesson3.src.downstreamer.downstreamer import Downstreamer
-from lesson3.src.logger.delay_logger import DelayLogger
-from lesson3.src.service.rtsp_service import RtspService
+from downstreamer.downstreamer import Downstreamer
+from logger.delay_logger import DelayLogger
+from service.rtsp_service import RtspService
 
 # ログ設定
 logging.basicConfig(
