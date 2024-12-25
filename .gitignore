@@ -5,6 +5,7 @@ venv/
 *.pyc
 __pycache__/
 .mypy_cache/
+.pytest_cache/
 
 openapitools.json
 .openapi-generator/

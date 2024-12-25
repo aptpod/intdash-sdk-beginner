@@ -2,8 +2,8 @@ import asyncio
 import logging
 import subprocess
 
-from lesson3.src.downstreamer.downstreamer import Downstreamer
-from lesson3.src.logger.delay_logger import DelayLogger
+from downstreamer.downstreamer import Downstreamer
+from logger.delay_logger import DelayLogger
 
 
 class RtspService:
