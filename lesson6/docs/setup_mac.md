@@ -24,7 +24,6 @@ find . -name "__pycache__" -type d -exec rm -r {} +
 zip -r intdash_sdk.zip python
 ls -l intdash_sdk.zip python
 ```
-
 ### カスタムLambdaレイヤー作成（Dockerコンテナ利用）
 #### 準備
 - protocol.protoを実行ディレクトリに保存
@@ -33,18 +32,15 @@ ls -l intdash_sdk.zip python
 ```sh
 docker build -t lambda-layer -f lesson6/intdash-distance/docker/Dockerfile .
 ```
-
 #### 実行
 ```sh
 docker run --name lambda-layer lambda-layer
 ```
-
 #### ZIP取得
 ```sh
 docker cp lambda-layer:/intdash_sdk.zip ./intdash_sdk.zip
 ```
-
-### Lambda関数作成
+### 距離算出Lambda関数作成
 
 #### ZIPファイル作成
 ```sh
@@ -53,6 +49,34 @@ find . -name "*.pyc" -delete
 find . -name "__pycache__" -type d -exec rm -r {} +
 zip -r ../deployment_package.zip .
 ```
+#### ZIPファイルアップロード
+Lambdaコード画面から、作成したZIPファイルをアップロードします。
+
+#### タイムアウト設定
+タイムアウト：5分
+
+#### 環境変数設定
+- `API_TOKEN`: サーバー環境にアクセスするAPIトークン
+- `API_URL`: サーバー環境のURL
+- `FETCH_SIZE`: データポイントを何件ずつ処理するか
+- `ORIGIN_LAT`: 基準点（緯度）
+- `ORIGIN_LON`: 基準点（経度）
+- `SLACK_URL`: 通知先Slack
+
+#### Lambdaレイヤー追加
+- intdash SDK: 作成したカスタムLambdaレイヤー
+- `requests`: 公開ARNを指定
+
+### レスポンス返却Lambda作成
+Lambdaコード画面に`lesson6/invoke-distance/src/lambda_function.py`の内容を貼り付けます。
+
+#### 環境変数設定
+- `SECRET_KEY`: Webhook設定に登録する任意の文字列
+
+### API Gateway作成
+POSTリクエストを受けるAPI Gatewayを作成します。
+
+レスポンス返却Lambdaと統合します。
 
 ## 実行
 
