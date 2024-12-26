@@ -9,7 +9,6 @@ pip install boto3 requests pytest
 ## AWS構築
 ### カスタムLambdaレイヤー作成（手動）
 #### 依存パッケージインストール
-WiP venvの必要がそもそもない
 ```powershell
 mkdir -p path\to\workdir\python\lib\python3.12\site-packages
 pip3.12 install pydantic python-dateutil urllib3 -t path\to\workdir\python\lib\python3.12\site-packages
