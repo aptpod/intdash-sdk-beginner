@@ -58,10 +58,10 @@ dir intdash
 
 ### Pythonインストール
 [Python公式サイト](https://www.python.org/downloads/)からインストーラーをダウンロードします。<br>
-例: python-3.13.0-amd64.exe
+例: python-3.12.7-amd64.exe
 
 インストール先のパスを環境変数Pathに追加します。<br>
-例: C:\Users\sanka\AppData\Local\Programs\Python\Python313
+例: C:\Users\sanka\AppData\Local\Programs\Python\Python312
 
 ```powershell
 python --version
