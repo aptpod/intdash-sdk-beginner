@@ -10,23 +10,19 @@ pip install boto3 requests pytest
 ### カスタムLambdaレイヤー作成（手動）
 #### 依存パッケージインストール
 ```sh
-mkdir -p path/to/workdir
-cd path/to/workdir
-python -m venv venv
-. ./venv/bin/activate
-pip install pydantic python-dateutil urllib3
-pip install protobuf
+mkdir -p path/to/workdir/python/lib/python3.12/site-packages
+pip3.12 install pydantic python-dateutil urllib3 -t path/to/workdir/python/lib/python3.12/site-packages
+pip3.12 install protobuf -t path/to/workdir/python/lib/python3.12/site-packages
 ```
 
 #### ZIPファイル作成
 ```sh
-mkdir -p python/lib/python3.12/site-packages
-cd path/to/intdash-sdk-workspace
-cp -r intdash gen path/to/workdir/venv/lib/python3.12/site-packages/* path/to/python/lib/python3.12/site-packages
+cp -r intdash gen path/to/workdir/python/lib/python3.12/site-packages
 cd path/to/workdir
 find . -name "*.pyc" -delete
 find . -name "__pycache__" -type d -exec rm -r {} +
 zip -r intdash_sdk.zip python
+ls -l intdash_sdk.zip python
 ```
 
 ### カスタムLambdaレイヤー作成（Dockerコンテナ利用）
