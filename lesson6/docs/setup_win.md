@@ -7,7 +7,7 @@ pip install boto3 requests pytest
 ```
 
 ## AWS構築
-### カスタムLambdaレイヤー作成（手動）
+### カスタムLambdaレイヤー作成
 #### 依存パッケージインストール
 ```powershell
 mkdir -p path\to\workdir\python\lib\python3.12\site-packages
@@ -25,6 +25,8 @@ Compress-Archive -Path python -DestinationPath intdash_sdk.zip
 ```
 
 ### カスタムLambdaレイヤー作成（Dockerコンテナ利用）
+ローカルPCでDockerが起動しているなら、DockerfileでZIPファイルを生成できます。
+
 #### 準備
 - protocol.protoを実行ディレクトリに保存
 
