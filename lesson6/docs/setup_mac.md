@@ -187,6 +187,6 @@ pytest -v -p no:warnings lesson6/intdash-distance/test/test_lambda_function.py
 Motionのデータ収集を停止します。
 
 ### 可視化
-Data Visualizerに[Datファイル](../intdash-distance/dat/Distance.dat)をインポート
+Data Visualizerに[Datファイル](../../lesson2/distance/dat/Distance.dat)をインポート
 
 Slack通知のData Visualizerのリンクをクリック
