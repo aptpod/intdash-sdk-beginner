@@ -4,6 +4,8 @@ PCの画面キャプチャしてアップストリームします。
 
 ![アーキテクチャ](../images/arch.png)
 
+![Stream Video](../images/ipad.png)
+
 ## 依存関係
 - REST API用intdash SDK for Python>=v2.7.0
 - pydantic>=2.9.2
