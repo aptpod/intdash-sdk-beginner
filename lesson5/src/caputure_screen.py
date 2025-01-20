@@ -5,14 +5,14 @@ import sys
 import urllib.parse
 
 import iscp
+from convertor.convertor import Convertor
+from service.capture_service import CaptureService
+from snapper.snapper import Snapper
+from upstreamer.upstreamer import Upstreamer
+from writer.measurement_writer import MeasurementWriter
 
 from intdash.api_client import ApiClient
 from intdash.configuration import Configuration
-from lesson5.src.convertor.convertor import Convertor
-from lesson5.src.service.capture_service import CaptureService
-from lesson5.src.snapper.snapper import Snapper
-from lesson5.src.upstreamer.upstreamer import Upstreamer
-from lesson5.src.writer.measurement_writer import MeasurementWriter
 
 # ログ設定
 logging.basicConfig(
