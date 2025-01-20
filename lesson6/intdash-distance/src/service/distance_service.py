@@ -1,6 +1,7 @@
 import logging
 
 from calculator.distance_calculator import DistanceCalculator
+from notifier.notifier import Notifier
 from reader.measurement_reader import MeasurementReader
 from writer.measurement_writer import MeasurementWriter
 
@@ -16,6 +17,7 @@ class DistanceService:
         calculator (DistanceCalculator): 距離算出
         writer (MeasurementWriter): 新規計測作成
         fetch_size (int): フェッチ件数
+        notifier (Notifier): Slack通知
     """
 
     def __init__(
@@ -26,6 +28,7 @@ class DistanceService:
         calculator: DistanceCalculator,
         writer: MeasurementWriter,
         fetch_size: int,
+        notifier: Notifier,
     ) -> None:
         self.project_uuid = project_uuid
         self.meas_uuid = meas_uuid
@@ -33,6 +36,7 @@ class DistanceService:
         self.caliculator = calculator
         self.writer = writer
         self.fetch_size = fetch_size
+        self.notifier = notifier
 
     def process(self) -> None:
         """
@@ -47,7 +51,9 @@ class DistanceService:
           - 計測作成
           - シーケンス作成
           - チャンク送信
+          - 計測削除（GPSデータなし）
           - 計測完了
+        - Slack通知
         """
         # 計測取得
         measurement_src = self.reader.get_measurement()
@@ -88,6 +94,16 @@ class DistanceService:
                     f"Sent sequence chunk: sequence number {result.sequence_number}, result: {result.result}"
                 )
 
+        # 計測削除（GPSデータなし）
+        if not count:
+            self.writer.delete_measurement()
+            logging.info(f"Deleted measurement: {measurement_dst.uuid}")
+            return
+
         # 計測完了
         self.writer.complete_measurement()
         logging.info(f"Completed measurement: {measurement_dst.uuid}")
+
+        # Slack通知
+        self.notifier.notify(measurement_dst.uuid)
+        logging.info(f"Notified: {measurement_dst.uuid}")

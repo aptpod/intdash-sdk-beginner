@@ -5,15 +5,15 @@ import sys
 import urllib.parse
 
 import iscp
+from convertor.convertor import Convertor
+from detector.detector import Detector
+from downstreamer.downstreamer import Downstreamer
+from service.detect_service import DetectService
+from upstreamer.upstreamer import Upstreamer
+from writer.measurement_writer import MeasurementWriter
 
 from intdash.api_client import ApiClient
 from intdash.configuration import Configuration
-from lesson4.src.convertor.convertor import Convertor
-from lesson4.src.detector.detector import Detector
-from lesson4.src.downstreamer.downstreamer import Downstreamer
-from lesson4.src.service.detect_service import DetectService
-from lesson4.src.upstreamer.upstreamer import Upstreamer
-from lesson4.src.writer.measurement_writer import MeasurementWriter
 
 # ログ設定
 logging.basicConfig(
