@@ -3,6 +3,7 @@
 映像データをダウンストリームしてRTSPで配信します。
 
 ![アーキテクチャ](../images/arch.png)
+![映像比較](../images/compare.jpg)
 
 ## 依存関係
 - iscp>=1.0.0
