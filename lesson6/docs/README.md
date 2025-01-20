@@ -7,6 +7,7 @@
 - 距離算出
   - 計測完了でWebhookしてAWS Lambdaで算出距離を登録します。
 ![距離算出アーキテクチャ](../intdash-distance/images/arch.png)
+![Data Visualizer](../intdash-distance/images/viz.png)
 
 ## 依存関係
 - REST API用intdash SDK for Python>=v2.7.0

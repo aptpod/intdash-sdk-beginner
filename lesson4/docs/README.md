@@ -6,6 +6,8 @@
 
 ![処理構成図](../images/service.png)
 
+![Data Visualizer](../images/viz.png)
+
 ## 依存関係
 - REST API用intdash SDK for Python>=v2.7.0
 - pydantic>=2.9.2
