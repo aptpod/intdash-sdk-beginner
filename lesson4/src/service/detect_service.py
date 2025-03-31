@@ -85,7 +85,8 @@ class DetectService:
             fetch_task = asyncio.create_task(self.fetch())  # H.264データ取得
 
             await asyncio.gather(basetime_task, feed_task, detect_task, fetch_task)
-        except TimeoutError:
+
+        finally:
             self.writer.complete_measurement(measurement.uuid)
             logging.info(f"Completed measurement: {measurement.uuid}")
 
