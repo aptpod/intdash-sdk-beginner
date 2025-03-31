@@ -9,6 +9,8 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
+import psutil
+
 from gen.intdash.v1.protocol_pb2 import (  # type: ignore
     StoreDataChunk,
     StoreDataChunks,
@@ -86,6 +88,15 @@ def measurement_decoder(dct: dict) -> dict:
             except ValueError:
                 pass
     return dct
+
+
+def log_memory_usage() -> None:
+    """
+    メモリ使用量出力
+    """
+    process = psutil.Process()
+    mem_info = process.memory_info()
+    logging.info(f"Memory Usage: {mem_info.rss / 1024 / 1024:.2f} MB")
 
 
 def get_client(api_url: str, api_token: str) -> ApiClient:
@@ -266,7 +277,7 @@ def send_chunks(
     measurement_uuid: str,
     basetime: datetime,
     sequence_uuid: str,
-    data_points: list,
+    datapoints: list,
 ) -> None:
     """
     チャンク送信
@@ -277,21 +288,19 @@ def send_chunks(
         measurement_uuid: 計測UUID
         basetime: 計測の基準時刻
         sequence_uuid: シーケンスのUUID
-        data_points: データポイントのリスト
+        datapoints: データポイントのリスト
     """
     chunks = []
     sequence_number = 1
     basetime_ns = int(basetime.timestamp() * 1_000_000) * 1_000
-    for i, data_point in enumerate(data_points):
-        point_time = data_point["time"]
+    for i, dp in enumerate(datapoints):
+        point_time = dp["time"]
         elapsed_time = point_time - basetime_ns
-        payload = base64.b64decode(data_point["data"]["d"])
+        payload = base64.b64decode(dp["data"]["d"])
         store_data_point = StoreDataPoint(elapsed_time=elapsed_time, payload=payload)
 
         store_data_point_group = StoreDataPointGroup(
-            data_id=StoreDataID(
-                type=data_point["data_type"], name=data_point["data_name"]
-            ),
+            data_id=StoreDataID(type=dp["data_type"], name=dp["data_name"]),
             data_points=[store_data_point],
         )
 
@@ -301,6 +310,8 @@ def send_chunks(
 
         chunks.append(store_data_chunk)
         sequence_number += 1
+
+        log_memory_usage()
 
     chunk = StoreDataChunks(
         meas_uuid=measurement_uuid, sequence_uuid=sequence_uuid, chunks=chunks
@@ -364,8 +375,9 @@ def main(
         src_file: 計測ファイルパス
     """
     logging.info(
-        f"Processing project_uuid: {project_uuid}, edge_uuid: {
-            edge_uuid}, src_file: {src_file}"
+        f"Processing project_uuid: {project_uuid}, edge_uuid: {edge_uuid}, src_file: {
+            src_file
+        }"
     )
 
     try:
