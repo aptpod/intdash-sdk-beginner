@@ -10,8 +10,6 @@ class DistanceService:
     距離算出サービス
 
     Attribute:
-        project_uuid (str): プロジェクトUUID
-        meas_uuid (str): 元計測UUID
         reader (MeasurementReader): 計測取得
         calculator (DistanceCalculator): 距離算出
         writer (MeasurementWriter): 新規計測作成
@@ -20,15 +18,11 @@ class DistanceService:
 
     def __init__(
         self,
-        project_uuid: str,
-        meas_uuid: str,
         reader: MeasurementReader,
         calculator: DistanceCalculator,
         writer: MeasurementWriter,
         fetch_size: int,
     ) -> None:
-        self.project_uuid = project_uuid
-        self.meas_uuid = meas_uuid
         self.reader = reader
         self.caliculator = calculator
         self.writer = writer
