@@ -64,7 +64,7 @@ class CaptureService:
 
             await asyncio.gather(capture_task, fetch_task)
 
-        except asyncio.CancelledError:
+        finally:
             self.writer.complete_measurement(measurement.uuid)
             logging.info(f"Completed measurement: {measurement.uuid}")
 
