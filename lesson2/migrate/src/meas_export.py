@@ -6,6 +6,8 @@ import traceback
 from datetime import datetime
 from typing import Any
 
+import psutil
+
 from intdash import ApiClient, Configuration
 from intdash.api import (
     measurement_service_data_points_api,
@@ -53,6 +55,15 @@ class MeasurementEncoder(json.JSONEncoder):
             return obj.to_dict()
 
         return super().default(obj)
+
+
+def log_memory_usage() -> None:
+    """
+    メモリ使用量出力
+    """
+    process = psutil.Process()
+    mem_info = process.memory_info()
+    logging.info(f"Memory Usage: {mem_info.rss / 1024 / 1024:.2f} MB")
 
 
 def get_client(api_url: str, api_token: str) -> ApiClient:
@@ -143,6 +154,7 @@ def get_datapoints(client: ApiClient, project_uuid: str, meas_uuid: str) -> list
 
         dp = json.loads(line.decode())
         data_points.append(dp)
+        log_memory_usage()
 
     count = len(data_points)
     logging.info(f"Download datapoints: {count}")
@@ -169,6 +181,8 @@ def save(
         "basetimes": basetimes,
         "datapoints": datapoints,
     }
+
+    log_memory_usage()
 
     with open(file_path, "w", encoding="utf-8") as f:
         json.dump(dst_data, f, cls=MeasurementEncoder, ensure_ascii=False, indent=2)
