@@ -123,4 +123,4 @@ class Upstreamer:
         """
         切断
         """
-        await self.conn.close()
+        await self.up.close()
