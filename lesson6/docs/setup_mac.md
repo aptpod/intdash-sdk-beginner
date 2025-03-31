@@ -3,8 +3,9 @@
 ## ローカルPCインストール
 ### Python依存パッケージインストール
 ```sh
-pip install boto3 requests pytest
+pip install boto3 requests types-requests pytest
 ```
+`types-requests`は My Type Checker の警告回避のため。
 
 ## AWS構築
 ### カスタムLambdaレイヤー作成
