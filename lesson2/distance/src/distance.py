@@ -55,8 +55,6 @@ def main(api_url: str, api_token: str, project_uuid: str, meas_uuid: str) -> Non
     try:
         client = get_client(api_url, api_token)
         service = DistanceService(
-            project_uuid,
-            meas_uuid,
             MeasurementReader(client, project_uuid, meas_uuid),
             DistanceCalculator(ORIGIN),
             MeasurementWriter(client, project_uuid),
