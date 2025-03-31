@@ -25,7 +25,7 @@ export PYTHONPATH=/path/to/your_workspace/intdash:
 
 ### サンプルプログラム
 ```sh
-python lesson4/src/detect_people.py  --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID>
+python lesson4/src/detect_people.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID>
 ```
 
 ### 収集開始
@@ -39,3 +39,6 @@ python lesson4/src/detect_people.py  --api_url https://example.intdash.jp --api_
 
 ### 可視化
 Data Visualizerに[Datファイル](../dat/Detect%20People.dat)をインポート
+
+## 制限事項
+本プログラムでアップストリームしたH.264データは、現行バージョンのMedia Explorerでは表示できません。
