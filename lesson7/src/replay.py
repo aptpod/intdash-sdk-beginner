@@ -153,7 +153,7 @@ async def main(
         logging.error(f"Exception occurred: {e}", exc_info=True)
     finally:
         await service.close()
-        conn.close()
+        await conn.close()
 
 
 if __name__ == "__main__":
