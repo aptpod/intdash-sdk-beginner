@@ -84,6 +84,10 @@ class ReplayService:
 
             await asyncio.gather(feed_task, fetch_task)
 
+        except TimeoutError:
+            pass
+        except asyncio.CancelledError:
+            pass
         finally:
             self.writer.complete_measurement(measurement.uuid)
             logging.info(f"Completed measurement: {measurement.uuid}")
