@@ -80,4 +80,4 @@ class Downstreamer:
         """
         切断
         """
-        await self.conn.close()
+        await self.down.close()

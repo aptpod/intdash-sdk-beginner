@@ -7,7 +7,7 @@ import sys
 import traceback
 import uuid
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Generator, Optional
 
 import psutil
 
@@ -45,6 +45,9 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)],
 )
+
+# 定数定義
+CHUNK_SIZE = 1000
 
 
 def measurement_decoder(dct: dict) -> dict:
@@ -99,6 +102,21 @@ def log_memory_usage() -> None:
     logging.info(f"Memory Usage: {mem_info.rss / 1024 / 1024:.2f} MB")
 
 
+def load(file_path: str) -> Generator[dict, None, None]:
+    """
+    JSON Linesファイル読み込み
+
+    Args:
+        file_path (str): JSON Linesファイルパス
+    """
+    with open(file_path, "r", encoding="utf-8") as f:
+        for line in f:
+            try:
+                yield json.loads(line, object_hook=measurement_decoder)
+            except json.JSONDecodeError as e:
+                logging.warning(f"JSON decode error: {e}")
+
+
 def get_client(api_url: str, api_token: str) -> ApiClient:
     """
     APIクライアント取得
@@ -143,22 +161,20 @@ def create_measurement(
     return measurement
 
 
-def create_basetimes(
+def clear_basetimes(
     client: ApiClient,
     project_uuid: str,
     measurement_uuid: str,
-    base_times_src: list,
 ) -> None:
     """
-    基準時刻作成
+    基準時刻クリア
 
-    計測作成で作成した基準時刻を削除し、改めて基準時刻を作成
+    計測作成で作成した基準時刻を削除
 
     Args:
         client: APIクライアント
         project_uuid: プロジェクトのUUID
         measurement_uuid: 計測UUID
-        base_times_src: 基準時刻の詳細情報のリスト
     """
     api = measurement_service_measurement_base_times_api.MeasurementServiceMeasurementBaseTimesApi(
         client
@@ -176,17 +192,35 @@ def create_basetimes(
         )
         logging.info(f"Deleted measurement base time: {bt_current.id}")
 
-    for bt_src in base_times_src:
-        bt_copy = bt_src.copy()
-        bt_copy["priority"] = MeasBaseTimePriority(bt_src["priority"])
-        bt_copy["name"] = MeasBaseTimeName(bt_src["name"])
-        bt_create = CreateMeasBaseTime(**bt_copy)
-        base_time = api.create_project_measurement_base_time(
-            project_uuid=project_uuid,
-            measurement_uuid=measurement_uuid,
-            create_meas_base_time=bt_create,
-        )
-        logging.info(f"Created measurement base time: {base_time.id}")
+
+def create_basetime(
+    client: ApiClient,
+    project_uuid: str,
+    measurement_uuid: str,
+    basetime: dict,
+) -> None:
+    """
+    基準時刻作成
+
+    Args:
+        client: APIクライアント
+        project_uuid: プロジェクトのUUID
+        measurement_uuid: 計測UUID
+        basetime: 基準時刻
+    """
+    api = measurement_service_measurement_base_times_api.MeasurementServiceMeasurementBaseTimesApi(
+        client
+    )
+    bt_copy = basetime.copy()
+    bt_copy["priority"] = MeasBaseTimePriority(basetime["priority"])
+    bt_copy["name"] = MeasBaseTimeName(basetime["name"])
+    bt_create = CreateMeasBaseTime(**bt_copy)
+    base_time = api.create_project_measurement_base_time(
+        project_uuid=project_uuid,
+        measurement_uuid=measurement_uuid,
+        create_meas_base_time=bt_create,
+    )
+    logging.info(f"Created measurement basetime: {base_time.id}")
 
 
 def create_markers(
@@ -278,51 +312,55 @@ def send_chunks(
     basetime: datetime,
     sequence_uuid: str,
     datapoints: list,
-) -> None:
+    sequence_start: int,
+) -> int:
     """
-    チャンク送信
+    データポイントをチャンクで分割送信
+    - CHUNK_SIZE 単位で分割して送信
+    - StoreDataPoint, StoreDataPointGroup, StoreDataChunk を順次生成
+    - Protobuf形式で送信
 
     Args:
-        client: APIクライアント
-        project_uuid: プロジェクトのUUID
-        measurement_uuid: 計測UUID
-        basetime: 計測の基準時刻
-        sequence_uuid: シーケンスのUUID
-        datapoints: データポイントのリスト
+        client (ApiClient): APIクライアント
+        project_uuid (str): プロジェクトのUUID
+        measurement_uuid (str): 計測UUID
+        basetime (datetime): 計測の基準時刻
+        sequence_uuid (str): シーケンスのUUID
+        datapoints (list): データポイントのリスト
+        sequence_start (int): シーケンス番号初期値
+
+    Returns:
+        int: 次回のーケンス番号初期値
     """
-    chunks = []
-    sequence_number = 1
+    api = measurement_service_measurement_sequences_api.MeasurementServiceMeasurementSequencesApi(
+        client
+    )
+
     basetime_ns = int(basetime.timestamp() * 1_000_000) * 1_000
+    chunks = []
+
     for i, dp in enumerate(datapoints):
-        point_time = dp["time"]
-        elapsed_time = point_time - basetime_ns
+        elapsed_time = dp["time"] - basetime_ns
         payload = base64.b64decode(dp["data"]["d"])
         store_data_point = StoreDataPoint(elapsed_time=elapsed_time, payload=payload)
-
         store_data_point_group = StoreDataPointGroup(
             data_id=StoreDataID(type=dp["data_type"], name=dp["data_name"]),
             data_points=[store_data_point],
         )
-
         store_data_chunk = StoreDataChunk(
-            sequence_number=sequence_number, data_point_groups=[store_data_point_group]
+            sequence_number=sequence_start + i,
+            data_point_groups=[store_data_point_group],
         )
-
         chunks.append(store_data_chunk)
-        sequence_number += 1
-
-        log_memory_usage()
 
     chunk = StoreDataChunks(
-        meas_uuid=measurement_uuid, sequence_uuid=sequence_uuid, chunks=chunks
+        meas_uuid=measurement_uuid,
+        sequence_uuid=sequence_uuid,
+        chunks=chunks,
     )
     if not chunk.chunks:
         logging.info("No chunks available to send.")
-        return
-
-    api = measurement_service_measurement_sequences_api.MeasurementServiceMeasurementSequencesApi(
-        client
-    )
+        return sequence_start
 
     results = api.create_project_measurement_sequence_chunks(
         project_uuid=project_uuid,
@@ -333,6 +371,8 @@ def send_chunks(
         logging.info(
             f"Sent sequence chunk: sequence number {result.sequence_number}, result: {result.result}"
         )
+
+    return sequence_start + len(datapoints)
 
 
 def complete_measurement(
@@ -348,7 +388,8 @@ def complete_measurement(
     """
     api = measurement_service_measurements_api.MeasurementServiceMeasurementsApi(client)
     api.complete_project_measurement(
-        project_uuid=project_uuid, measurement_uuid=measurement_uuid
+        project_uuid=project_uuid,
+        measurement_uuid=measurement_uuid,
     )
 
 
@@ -356,7 +397,7 @@ def main(
     api_url: str, api_token: str, project_uuid: str, edge_uuid: str, src_file: str
 ) -> None:
     """
-    メイン
+    メイン（随時み出し版）
     - 計測ファイル読込
     - 計測データ作成
       - APIクライアント作成
@@ -375,38 +416,69 @@ def main(
         src_file: 計測ファイルパス
     """
     logging.info(
-        f"Processing project_uuid: {project_uuid}, edge_uuid: {edge_uuid}, src_file: {
-            src_file
-        }"
+        f"Processing project_uuid: {project_uuid}, edge_uuid: {edge_uuid}, src_file: {src_file}"
     )
 
     try:
-        # 計測ファイル読込
-        with open(src_file, "r", encoding="utf-8") as json_file:
-            data = json.load(json_file, object_hook=measurement_decoder)
-
-        # 計測データ作成
+        # APIクライアント生成
         client = get_client(api_url, api_token)
-        measurement = create_measurement(
-            client, project_uuid, edge_uuid, data["measurement"]
-        )
-        create_basetimes(client, project_uuid, measurement.uuid, data["basetimes"])
-        create_markers(
-            client, project_uuid, measurement.uuid, data["measurement"]["markers"]
-        )
-        sequence = replace_measurement_sequence(
-            client, project_uuid, measurement.uuid, None, data["measurement"]
-        )
-        send_chunks(
-            client,
-            project_uuid,
-            measurement.uuid,
-            data["measurement"]["basetime"],
-            sequence.uuid,
-            data["datapoints"],
-        )
-        complete_measurement(client, project_uuid, measurement.uuid)
 
+        measurement_src = {}
+        buffer = []
+
+        sequence_uuid = str(uuid.uuid4())
+        sequence_number = 1
+
+        for entry in load(src_file):
+            if "measurement" in entry:
+                measurement_src = entry["measurement"]
+                markers = measurement_src.get("markers", [])
+                measurement = create_measurement(
+                    client, project_uuid, edge_uuid, measurement_src
+                )
+                create_markers(client, project_uuid, measurement.uuid, markers)
+                replace_measurement_sequence(
+                    client,
+                    project_uuid,
+                    measurement.uuid,
+                    sequence_uuid,
+                    measurement_src,
+                )
+                clear_basetimes(client, project_uuid, measurement.uuid)
+            elif "basetime" in entry:
+                create_basetime(
+                    client, project_uuid, measurement.uuid, entry["basetime"]
+                )
+            elif "datapoint" in entry:
+                if not measurement_src:
+                    raise ValueError("Measurement must be defined before datapoints")
+                buffer.append(entry["datapoint"])
+                if len(buffer) >= CHUNK_SIZE:
+                    sequence_number = send_chunks(
+                        client,
+                        project_uuid,
+                        measurement.uuid,
+                        measurement_src["basetime"],
+                        sequence_uuid,
+                        buffer,
+                        sequence_number,
+                    )
+                    buffer.clear()
+                    log_memory_usage()
+
+        if buffer:
+            send_chunks(
+                client,
+                project_uuid,
+                measurement.uuid,
+                measurement_src["basetime"],
+                sequence_uuid,
+                buffer,
+                sequence_number,
+            )
+
+        # 計測完了
+        complete_measurement(client, project_uuid, measurement.uuid)
         logging.info(f"Created measurement: {measurement.uuid}")
 
     except Exception as e:
@@ -416,7 +488,7 @@ def main(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Input from JSON and create new measurement."
+        description="Input from JSON Lines and create new measurement."
     )
     parser.add_argument("--api_url", required=True, help="URL of the intdash API")
     parser.add_argument("--api_token", required=True, help="API Token")
@@ -427,7 +499,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--edge_uuid", required=True, help="Edge UUID")
     parser.add_argument(
-        "--src_file", required=True, help="Path to the Measurement JSON file"
+        "--src_file", required=True, help="Path to the Measurement JSON Lines file"
     )
 
     args = parser.parse_args()

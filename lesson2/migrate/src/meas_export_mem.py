@@ -4,7 +4,7 @@ import logging
 import sys
 import traceback
 from datetime import datetime
-from typing import Any
+from typing import Any, Generator
 
 import psutil
 
@@ -129,7 +129,12 @@ def get_basetimes(client: ApiClient, project_uuid: str, meas_uuid: str) -> list:
     return basetimes["items"]
 
 
-def get_datapoints(client: ApiClient, project_uuid: str, meas_uuid: str) -> list:
+def get_datapoints(
+    client: ApiClient,
+    project_uuid: str,
+    meas_uuid: str,
+    chunk_size: int = 262144,  # 256KB
+) -> Generator[dict, None, None]:
     """
     計測データポイント取得
 
@@ -137,34 +142,45 @@ def get_datapoints(client: ApiClient, project_uuid: str, meas_uuid: str) -> list
         client: APIクライアント
         project_uuid: プロジェクトUUID
         meas_uuid: 計測UUID
+        chunk_size (int): データチャンクサイズ
 
-    Returns:
-        list: データポイントのリスト
+    Yields:
+        dict: データポイント
     """
     api = measurement_service_data_points_api.MeasurementServiceDataPointsApi(client)
-    stream = api.list_project_data_points(
-        project_uuid=project_uuid, name=meas_uuid, time_format="ns"
-    )
+    params = {
+        "project_uuid": project_uuid,
+        "name": meas_uuid,
+        "time_format": "ns",
+        "_preload_content": False,
+    }
+    stream = api.list_project_data_points(**params)
+    if stream is None:
+        raise Exception("Error: stream is None")
 
-    data_points = []
+    # バッファ格納
+    buffer = b""
     while True:
-        line = stream.readline()
-        if not line:
+        chunk = stream.read(chunk_size)
+        if not chunk:
             break
+        buffer += chunk
 
-        dp = json.loads(line.decode())
-        data_points.append(dp)
-        log_memory_usage()
-
-    count = len(data_points)
-    logging.info(f"Download datapoints: {count}")
-    return data_points
+        # JSON Line切り出し
+        while b"\n" in buffer:
+            line, buffer = buffer.split(b"\n", 1)
+            line_json = json.loads(line.decode())
+            if "data" not in line_json:
+                continue
+            if "d" not in line_json["data"]:
+                continue
+            yield line_json
 
 
 def save(
     measurement: Measurement,
     basetimes: list,
-    datapoints: list,
+    datapoints: Generator[dict, None, None],
     file_path: str,
 ) -> None:
     """
@@ -173,33 +189,39 @@ def save(
     Args:
         measurement: 計測オブジェクト
         basetimes: 計測基準時刻リスト
-        datapoints: データポイント
+        datapoints: データポイント（ジェネレータ）
         file_path: ファイルパス
     """
-    dst_data = {
-        "measurement": measurement.to_dict(),
-        "basetimes": basetimes,
-        "datapoints": datapoints,
-    }
-
-    log_memory_usage()
-
     with open(file_path, "w", encoding="utf-8") as f:
-        json.dump(dst_data, f, cls=MeasurementEncoder, ensure_ascii=False, indent=2)
+        json.dump(
+            {"measurement": measurement}, f, cls=MeasurementEncoder, ensure_ascii=False
+        )
+        f.write("\n")
+
+        for bt in basetimes:
+            json.dump({"basetime": bt}, f, cls=MeasurementEncoder, ensure_ascii=False)
+            f.write("\n")
+
+        for dp in datapoints:
+            json.dump({"datapoint": dp}, f, cls=MeasurementEncoder, ensure_ascii=False)
+            f.write("\n")
+            log_memory_usage()
 
 
 def main(api_url: str, api_token: str, project_uuid: str, meas_uuid: str) -> None:
     """
-    メイン
+    メイン（随時取得版）
     - 計測データ取得
       - 計測、基準時刻、データポイントを取得
     - 計測ファイル保存
-      - 以下の形式でJSONファイルを保存する
-        {
-          "measurement": <計測オブジェクト>,
-          "basetimes": [<基準時刻>, <基準時刻>, ..]
-          "datapoints": [<データポイント>, <データポイント>, ..]
-        }
+      - 以下の形式でJSON Linesファイルを保存する
+        {"measurement": <計測オブジェクト>}
+        {"basetime": <基準時刻>}
+        {"basetime": <基準時刻>}
+        ...
+        {"datapoint": <データポイント>}
+        {"datapoint": <データポイント>}
+        ...
 
     Args:
         api_url: intdash APIのURL
@@ -217,7 +239,7 @@ def main(api_url: str, api_token: str, project_uuid: str, meas_uuid: str) -> Non
         datapoints = get_datapoints(client, project_uuid, meas_uuid)
 
         # 計測ファイル保存
-        dst_file = f"{DATA_PATH}/measurement_{meas_uuid}.json"
+        dst_file = f"{DATA_PATH}/measurement_{meas_uuid}.jsonl"
         save(measurement, basetimes, datapoints, dst_file)
         logging.info(f"Saved: {dst_file}")
 

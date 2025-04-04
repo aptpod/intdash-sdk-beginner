@@ -146,6 +146,7 @@ async def main(api_url: str, api_token: str, project_uuid: str, edge_uuid: str) 
         logging.error(f"Exception occurred: {e}", exc_info=True)
     finally:
         await service.close()
+        await conn.close()
 
 
 if __name__ == "__main__":

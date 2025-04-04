@@ -76,4 +76,4 @@ class Downstreamer:
         """
         ダウンストリーム切断
         """
-        await self.conn.close()
+        await self.down.close()
