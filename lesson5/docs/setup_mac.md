@@ -20,7 +20,7 @@ export PYTHONPATH=/path/to/your_workspace/intdash:
 
 ### サンプルプログラム
 ```sh
-python lesson5/src/capture_screen.py  --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID>
+python lesson5/src/capture_screen.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID>
 ```
 
 ### 可視化
@@ -30,3 +30,6 @@ python lesson5/src/capture_screen.py  --api_url https://example.intdash.jp --api
   - <YOUR_EDGE_UUID>
   - Data Type: `h264_frame`
   - Data Name: `10/h264`
+
+## 制限事項
+本プログラムでアップストリームしたH.264データは、現行バージョンのMedia Explorerでは表示できません。

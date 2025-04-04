@@ -72,8 +72,6 @@ def lambda_handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     try:
         client = get_client(api_url, api_token)
         service = DistanceService(
-            project_uuid,
-            meas_uuid,
             MeasurementReader(client, project_uuid, meas_uuid),
             DistanceCalculator(origin),
             MeasurementWriter(client, project_uuid),
