@@ -43,11 +43,15 @@ class RtspService:
             - ダウンストリームしたH.264データの経過時間を遅延ロガーに渡してログ出力
             - ダウンストリームしたH.264データをFFmpeg、ffplayに渡して可視化
         """
-        await self.downstreamer.open()
+        try:
+            await self.downstreamer.open()
 
-        basetime_task = asyncio.create_task(self.basetime())  # 基準時刻設定
-        feed_task = asyncio.create_task(self.feed())  # H.264データ供給
-        await asyncio.gather(basetime_task, feed_task)
+            basetime_task = asyncio.create_task(self.basetime())  # 基準時刻設定
+            feed_task = asyncio.create_task(self.feed())  # H.264データ供給
+            await asyncio.gather(basetime_task, feed_task)
+
+        except asyncio.CancelledError:
+            pass
 
     async def basetime(self) -> None:
         """

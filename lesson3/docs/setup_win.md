@@ -49,7 +49,7 @@ $env:PYTHONPATH = "/path/to/your_workspace;"
 
 ### サンプルプログラム
 ```powershell
-python lesson3/src/rtsp_stream.py  --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID>
+python lesson3/src/rtsp_stream.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID>
 ```
 
 ### 収集開始

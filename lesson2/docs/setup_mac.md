@@ -52,6 +52,11 @@ ls -l gen
 pip install protobuf
 ```
 
+### メモリ使用量表示
+```sh
+pip install psutil
+```
+
 ## 実行
 ### PYTHONPATH設定
 ```sh
@@ -62,7 +67,7 @@ export PYTHONPATH=/path/to/your_workspace/intdash:
 ### データ移行ツール
 #### エクスポート
 ```sh
-python lesson2/migrate/src/meas_export.py--api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --meas_uuid <YOUR_MEAS_UUID>
+python lesson2/migrate/src/meas_export.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --meas_uuid <YOUR_MEAS_UUID>
 ```
 
 #### インポート
