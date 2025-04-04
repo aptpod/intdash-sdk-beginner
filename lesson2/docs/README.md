@@ -20,6 +20,7 @@
 - matplotlib>=3.9.2
 - Protocol Buffersエンコーダー==intdash.v1
 - protobuf>=5.28.3
+- psutil>=7.0.0
 
 ## インストール&実行
 
