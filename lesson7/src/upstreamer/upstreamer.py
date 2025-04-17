@@ -11,19 +11,16 @@ class Upstreamer:
 
     Attributes:
         conn (iscp.Conn): コネクション
-        edge_uuid (str): エッジデバイスUUID
     """
 
-    def __init__(self, conn: iscp.Conn, edge_uuid: str):
+    def __init__(self, conn: iscp.Conn):
         """
         コンストラクタ
 
         Args:
             conn (iscp.Conn): コネクション
-            edge_uuid (str): エッジデバイスUUID
         """
         self.conn = conn
-        self.edge_uuid = edge_uuid
 
     async def open(self, session_id: str) -> None:
         """
