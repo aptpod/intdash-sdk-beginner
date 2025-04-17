@@ -27,7 +27,13 @@ READ_TIMEOUT = 5 * 60.0  # 秒
 PING_INTERVAL = 10 * 60.0  # 秒
 PING_TIMEOUT = 10.0  # 秒
 
+DOWN_DATA_NAME = "1/h264"
+UP_DATA_NAME_VIDEO = "10/h264"
+UP_DATA_NAME_COUNT = "11/detect_count"
+
 TARGET_SIZE = 640, 480
+CONFIDENCE_THRESHOULD = 0.2
+
 FPS = 15
 BITRATE = 3000  # kbps
 KEY_INT_MAX = FPS * 2
@@ -69,7 +75,7 @@ async def connect(
     ping_timeout: float,
 ) -> iscp.Conn:
     """
-    サーバー接続
+    リアルタイムAPI接続
 
 
     Args:
@@ -96,7 +102,7 @@ async def connect(
 
 def get_client(api_url: str, api_token: str) -> ApiClient:
     """
-    APIクライアント取得
+    REST API接続
 
     Args:
         api_url (str): APIのURL
@@ -111,7 +117,9 @@ def get_client(api_url: str, api_token: str) -> ApiClient:
     return client
 
 
-async def main(api_url: str, api_token: str, project_uuid: str, edge_uuid: str) -> None:
+async def main(
+    api_url: str, api_token: str, project_uuid: str, edge_uuid: str, dst_edge_uuid: str
+) -> None:
     """
     メイン
 
@@ -124,9 +132,12 @@ async def main(api_url: str, api_token: str, project_uuid: str, edge_uuid: str) 
         api_url (str): 接続するAPIのURL
         api_token (str): 認証用のAPIトークン
         project_uuid (str): プロジェクトのUUID
-        edge_uuid (str): エッジデバイスのUUID
+        edge_uuid (str): ダウンストリーム元エッジデバイスのUUID
+        dst_edge_uuid (str): アップストリーム先エッジデバイスのUUID
     """
-    logging.info(f"Starting detect project_uuid: {project_uuid} edge_uuid: {edge_uuid}")
+    logging.info(
+        f"Starting detect project_uuid: {project_uuid} edge_uuid: {edge_uuid} dst_edge_uuid: {dst_edge_uuid}"
+    )
 
     try:
         conn = await connect(
@@ -138,20 +149,29 @@ async def main(api_url: str, api_token: str, project_uuid: str, edge_uuid: str) 
             PING_INTERVAL,
             PING_TIMEOUT,
         )
+        dst_conn = await connect(
+            api_url,
+            PORT,
+            api_token,
+            project_uuid,
+            dst_edge_uuid,
+            PING_INTERVAL,
+            PING_TIMEOUT,
+        )
         client = get_client(api_url, api_token)
         service = DetectService(
-            Downstreamer(
-                conn,
-                edge_uuid,
-            ),
+            Downstreamer(conn, edge_uuid, DOWN_DATA_NAME),
             Convertor(DECODE_PIPELINE),
-            Detector(WEIGHTS_PATH, CONFIG_PATH, NAMES_PATH, TARGET_SIZE),
-            Convertor(ENCODE_PIPELINE),
-            MeasurementWriter(client, project_uuid, edge_uuid),
-            Upstreamer(
-                conn,
-                edge_uuid,
+            Detector(
+                WEIGHTS_PATH,
+                CONFIG_PATH,
+                NAMES_PATH,
+                TARGET_SIZE,
+                CONFIDENCE_THRESHOULD,
             ),
+            Convertor(ENCODE_PIPELINE),
+            MeasurementWriter(client, project_uuid, dst_edge_uuid),
+            Upstreamer(dst_conn, UP_DATA_NAME_VIDEO, UP_DATA_NAME_COUNT),
         )
         await service.start(READ_TIMEOUT)
 
@@ -179,7 +199,16 @@ if __name__ == "__main__":
         help="Project UUID (default: 00000000-0000-0000-0000-000000000000)",
     )
     parser.add_argument("--edge_uuid", required=True, help="Edge UUID")
+    parser.add_argument("--dst_edge_uuid", required=False, help="Dest Edge UUID")
 
     args = parser.parse_args()
 
-    asyncio.run(main(args.api_url, args.api_token, args.project_uuid, args.edge_uuid))
+    asyncio.run(
+        main(
+            args.api_url,
+            args.api_token,
+            args.project_uuid,
+            args.edge_uuid,
+            args.dst_edge_uuid if args.dst_edge_uuid else args.edge_uuid,
+        )
+    )
