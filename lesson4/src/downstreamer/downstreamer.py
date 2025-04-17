@@ -13,18 +13,21 @@ class Downstreamer:
     Attributes:
         conn (iscp.Conn): コネクション
         edge_uuid (str): エッジデバイスUUID
+        data_name (str): 受信データ名
     """
 
-    def __init__(self, conn: iscp.Conn, edge_uuid: str) -> None:
+    def __init__(self, conn: iscp.Conn, edge_uuid: str, data_name: str) -> None:
         """
         コンストラクタ
 
         Args:
             conn (iscp.Conn): コネクション
             edge_uuid (str): エッジデバイスUUID
+            data_name (str): 受信データ名
         """
         self.conn = conn
         self.edge_uuid = edge_uuid
+        self.data_name = data_name
 
     async def open(self) -> None:
         """
@@ -37,8 +40,7 @@ class Downstreamer:
                 iscp.DownstreamFilter(
                     source_node_id=self.edge_uuid,
                     data_filters=[
-                        iscp.DataFilter(name="1/h264", type="h264_frame/idr_frame"),
-                        iscp.DataFilter(name="1/h264", type="h264_frame/non_idr_frame"),
+                        iscp.DataFilter(name=self.data_name, type="#"),
                     ],
                 )
             ],

@@ -70,9 +70,19 @@ export PYTHONPATH=/path/to/your_workspace/intdash:
 python lesson2/migrate/src/meas_export.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --meas_uuid <YOUR_MEAS_UUID>
 ```
 
+#### エクスポート メモリ消費量低減：随時取得版
+```sh
+python lesson2/migrate/src/meas_export_mem.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --meas_uuid <YOUR_MEAS_UUID>
+```
+
 #### インポート
 ```sh
 python lesson2/migrate/src/meas_import.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --src_file <EXPORTED_JSON_FILE>
+```
+
+#### インポート メモリ消費量低減：随時読み出し版
+```sh
+python lesson2/migrate/src/meas_import_mem.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --src_file <EXPORTED_JSON_FILE>
 ```
 
 ### GPS距離算出
