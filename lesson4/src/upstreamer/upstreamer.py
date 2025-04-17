@@ -12,7 +12,8 @@ class Upstreamer:
 
     Attributes:
         conn (iscp.Conn): コネクション
-        edge_uuid (str): エッジデバイスUUID
+        data_name_video (str): 送信データ名（検出後映像）
+        data_name_count (str): 送信データ名（検出数）
     """
 
     @staticmethod
@@ -77,16 +78,18 @@ class Upstreamer:
         # 全ての必要なNAL Unitが見つからなかった場合
         return False
 
-    def __init__(self, conn: iscp.Conn, edge_uuid: str):
+    def __init__(self, conn: iscp.Conn, data_name_video: str, data_name_count: str):
         """
         コンストラクタ
 
         Args:
             conn (iscp.Conn): コネクション
-            edge_uuid (str): エッジデバイスUUID
+            data_name_video (str): 送信データ名（検出後映像）
+            data_name_count (str): 送信データ名（検出数）
         """
         self.conn = conn
-        self.edge_uuid = edge_uuid
+        self.data_name_video = data_name_video
+        self.data_name_count = data_name_count
 
     async def open(self, session_id: str) -> None:
         """
@@ -116,6 +119,11 @@ class Upstreamer:
         """
         データポイント送信
 
+        - 10/h264
+          - SPS + PPS + IDR
+          - non-IDR
+        - 11/detect_count
+
         Args:
             elapsed_time: データポイントの経過時間
             payload: データポイントのペイロード
@@ -134,7 +142,7 @@ class Upstreamer:
             ),
         )
         await self.up.write_data_points(
-            iscp.DataID(name="11/detect_count", type="int64"),
+            iscp.DataID(name=self.data_name_count, type="int64"),
             iscp.DataPoint(
                 elapsed_time=elapsed_time,
                 payload=count.to_bytes(8, byteorder="big", signed=True),
