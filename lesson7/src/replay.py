@@ -139,7 +139,7 @@ async def main(
                 else None,
             ),
             MeasurementWriter(dst_client, dst_project_uuid, dst_edge_uuid),
-            Upstreamer(conn, dst_edge_uuid),
+            Upstreamer(conn),
             speed,
         )
         await service.start(READ_TIMEOUT)
