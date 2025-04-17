@@ -3,6 +3,8 @@ from typing import Tuple
 import cv2
 import numpy as np
 
+NET_SIZE = (416, 416)  # ネットワーク入力サイズ yolov4-tiny.cfg [net]セクション
+
 
 class Detector:
     """
@@ -21,6 +23,7 @@ class Detector:
         config_file: str,
         name_file: str,
         target_size: Tuple[int, int],
+        confidence_threshould: float = 0.5,
     ) -> None:
         """
         コンストラクタ
@@ -30,6 +33,7 @@ class Detector:
             config_file (str): 設定ファイルパス
             name_file (str): クラス名ファイルパス
             target_size (tuple): 変換後サイズ(width, height)
+            confidence_threshould: 信頼度閾値
         """
         self.net = cv2.dnn.readNet(weight_file, config_file)
         with open(name_file, "r") as f:
@@ -39,6 +43,7 @@ class Detector:
             layer_names[i - 1] for i in self.net.getUnconnectedOutLayers()
         ]
         self.target_size = target_size
+        self.confidence_threshould = confidence_threshould
 
     def detect(self, frame: bytes) -> Tuple[bytes, int]:
         """
@@ -53,6 +58,7 @@ class Detector:
         - 重複を非最大抑制で削除
         戻り値生成
         - 矩形描画・人数カウント
+        - 連続メモリ最適化（ブロックノイズ回避）
 
         Args:
             frame (bytes): 元フレーム
@@ -68,7 +74,11 @@ class Detector:
             )
         ).copy()
         blob = cv2.dnn.blobFromImage(
-            frame_reshaped, 1 / 255.0, self.target_size, swapRB=True, crop=False
+            cv2.resize(frame_reshaped, NET_SIZE),
+            1 / 255.0,
+            NET_SIZE,
+            swapRB=True,
+            crop=False,
         )
         self.net.setInput(blob)
 
@@ -81,14 +91,15 @@ class Detector:
         class_ids = []
         for out in outs:
             for detection in out:
-                scores = detection[5:]
+                detection_np = np.asarray(detection)
+                scores = detection_np[5:]
                 class_id = np.argmax(scores)
                 confidence = scores[class_id]
-                if confidence > 0.2:  # 信頼度0.2以上で全ての物体を検出
-                    center_x = int(detection[0] * width)
-                    center_y = int(detection[1] * height)
-                    w = int(detection[2] * width)
-                    h = int(detection[3] * height)
+                if confidence > self.confidence_threshould:
+                    center_x = int(detection_np[0] * width)
+                    center_y = int(detection_np[1] * height)
+                    w = int(detection_np[2] * width)
+                    h = int(detection_np[3] * height)
                     x = int(center_x - w / 2)
                     y = int(center_y - h / 2)
                     boxes.append([x, y, w, h])
@@ -120,4 +131,7 @@ class Detector:
                 2,
             )
 
-        return frame_reshaped.tobytes(), count
+        # 連続メモリ最適化（ブロックノイズ回避）
+        frame_ascontiguous = np.ascontiguousarray(frame_reshaped)
+
+        return frame_ascontiguous.tobytes(), count
