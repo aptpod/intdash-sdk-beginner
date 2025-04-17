@@ -25,7 +25,10 @@ PORT = 443
 PING_INTERVAL = 10 * 60.0  # 秒
 PING_TIMEOUT = 10.0  # 秒
 
-TARGET_SIZE = 1512, 982
+
+UP_DATA_NAME = "1/h264"
+
+TARGET_SIZE = 1920, 1080
 FPS = 15
 BITRATE = 3000  # kbps
 KEY_INT_MAX = FPS * 2
@@ -130,10 +133,7 @@ async def main(api_url: str, api_token: str, project_uuid: str, edge_uuid: str) 
             Snapper(TARGET_SIZE),
             Convertor(ENCODE_PIPELINE),
             MeasurementWriter(client, project_uuid, edge_uuid),
-            Upstreamer(
-                conn,
-                edge_uuid,
-            ),
+            Upstreamer(conn, UP_DATA_NAME),
             FPS,
         )
         await service.start()
