@@ -11,7 +11,7 @@ class Upstreamer:
 
     Attributes:
         conn (iscp.Conn): コネクション
-        edge_uuid (str): エッジデバイスUUID
+        data_name (str): 送信データ名
     """
 
     @staticmethod
@@ -76,16 +76,16 @@ class Upstreamer:
         # 全ての必要なNAL Unitが見つからなかった場合
         return False
 
-    def __init__(self, conn: iscp.Conn, edge_uuid: str):
+    def __init__(self, conn: iscp.Conn, data_name: str):
         """
         コンストラクタ
 
         Args:
             conn (iscp.Conn): コネクション
-            edge_uuid (str): エッジデバイスUUID
+            data_name (str): 送信データ名
         """
         self.conn = conn
-        self.edge_uuid = edge_uuid
+        self.data_name = data_name
 
     async def open(self, session_id: str) -> None:
         """
@@ -111,7 +111,7 @@ class Upstreamer:
             else "h264_frame/non_idr_frame"
         )
         await self.up.write_data_points(
-            iscp.DataID(name="10/h264", type=type),
+            iscp.DataID(name=self.data_name, type=type),
             iscp.DataPoint(
                 elapsed_time=elapsed_time,
                 payload=payload,
