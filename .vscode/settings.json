@@ -3,8 +3,13 @@
         "PYTHONPATH": "${workspaceFolder}"
     },
     "terminal.integrated.env.windows": {
+        "PYTHONPATH": "${workspaceFolder}"  
+    },
+    "terminal.integrated.env.linux": {
         "PYTHONPATH": "${workspaceFolder}"
     },
+    
+    "python.terminal.activateEnvironment": true,
     "[python]": {
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "charliermarsh.ruff",
