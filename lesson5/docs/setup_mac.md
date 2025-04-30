@@ -15,12 +15,12 @@ pip install mss
 ### PYTHONPATH設定
 ```sh
 echo $PYTHONPATH
-export PYTHONPATH=/path/to/your_workspace/intdash:
+export PYTHONPATH=/path/to/your_workspace
 ```
 
 ### サンプルプログラム
 ```sh
-python lesson5/src/capture_screen.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID>  --dst_edge_uuid <YOUR_DST_EDGE_UUID>
+python lesson5/src/capture_screen.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID>
 ```
 
 ### 可視化
