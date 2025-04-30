@@ -63,7 +63,7 @@ pip install folium matplotlib
 ### PYTHONPATH設定
 ```sh
 echo $PYTHONPATH
-export PYTHONPATH=/path/to/your_workspace:
+export PYTHONPATH=/path/to/your_workspace
 ```
 
 ### サンプルプログラム実行
