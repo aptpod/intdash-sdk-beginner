@@ -20,7 +20,7 @@ pip install opencv-python numpy PyGObject
 ### PYTHONPATH設定
 ```sh
 echo $PYTHONPATH
-export PYTHONPATH=/path/to/your_workspace/intdash:
+export PYTHONPATH=/path/to/your_workspace
 ```
 
 ### サンプルプログラム
