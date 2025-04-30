@@ -86,7 +86,7 @@ POSTリクエストを受けるAPI Gatewayを作成します。
 ### PYTHONPATH設定
 ```sh
 echo $PYTHONPATH
-export PYTHONPATH=/path/to/your_workspace/intdash:
+export PYTHONPATH=/path/to/your_workspace
 ```
 
 ### Webhook設定ツール
