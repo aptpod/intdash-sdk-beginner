@@ -17,7 +17,6 @@
 - pydantic>=2.9.2
 - python-dateutil>=2.9.0.post0
 - urllib3>=2.2.3
-- matplotlib>=3.9.2
 - Protocol Buffersエンコーダー==intdash.v1
 - protobuf>=5.28.3
 - psutil>=7.0.0
