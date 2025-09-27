@@ -12,7 +12,7 @@ class HookManager:
     """
     Webhook管理
 
-    Attribute:
+    Attributes:
         client (ApiClient): APIクライアント
         project_uuid (str): プロジェクトUUID
         api (WebhookServiceProjectWebhookApi): APIオブジェクト

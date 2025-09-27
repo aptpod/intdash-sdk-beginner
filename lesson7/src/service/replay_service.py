@@ -14,7 +14,7 @@ class ReplayService:
     """
     計測リプレイサービス
 
-    Attribute:
+    Attributes:
         reader (MeasurementReader): 計測取得
         writer (MeasurementWriter): 計測作成
         upstreamer (Upstreamer): アップストリーマー

@@ -9,7 +9,7 @@ class DistanceService:
     """
     距離算出サービス
 
-    Attribute:
+    Attributes:
         reader (MeasurementReader): 計測取得
         calculator (DistanceCalculator): 距離算出
         writer (MeasurementWriter): 新規計測作成

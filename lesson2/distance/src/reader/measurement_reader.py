@@ -15,7 +15,7 @@ class MeasurementReader:
     """
     計測取得
 
-    Attribute:
+    Attributes:
         client (ApiClient): APIクライアント
         project_uuid (str): プロジェクトUUID
         meas_uuid (str): 計測UUID
@@ -52,7 +52,7 @@ class MeasurementReader:
         前回データポイントの時刻+1からフェッチ開始
 
         Args:
-            fetch_size (str): フェッチ件数
+            fetch_size (int): フェッチ件数
 
         Returns:
             list: 位置情報(time, lat, lon)のリスト

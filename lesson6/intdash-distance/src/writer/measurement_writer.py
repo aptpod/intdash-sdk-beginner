@@ -30,7 +30,7 @@ class MeasurementWriter:
     """
     計測作成
 
-    Attribute:
+    Attributes:
         client (ApiClient): APIクライアント
         project_uuid (str): プロジェクトのUUID
         measurement (Measurement): 新規計測
@@ -76,8 +76,6 @@ class MeasurementWriter:
         シーケンス作成・置き換え
 
         Args:
-            project_uuid: プロジェクトのUUID
-            measurement: 計測情報
             sequence_uuid: シーケンスUUID
             count: データポイント数
 
