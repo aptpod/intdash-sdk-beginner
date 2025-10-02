@@ -47,13 +47,7 @@ class HookManager:
         Returns:
             dict: Webhook設定
         """
-        # WiP: Get Project Hookは次バージョンで対応予定
-        # return self.api.get_project_webhook(self.project_uuid, hook_uuid)
-        hooks = self.api.list_project_webhooks(
-            self.project_uuid,
-            hook_uuid=[hook_uuid],
-        )
-        return hooks.items[0]
+        return self.api.get_project_webhook(self.project_uuid, hook_uuid)
 
     def save(
         self, hook_src: Dict[str, Any], hook_uuid: Optional[str] = None
