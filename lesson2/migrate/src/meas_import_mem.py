@@ -119,7 +119,7 @@ def load(file_path: str) -> Generator[dict, None, None]:
 
 def get_client(api_url: str, api_token: str) -> ApiClient:
     """
-    APIクライアント取得
+    REST API設定
 
     Args:
         api_url: APIのURL
