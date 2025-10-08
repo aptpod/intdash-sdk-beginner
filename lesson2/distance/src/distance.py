@@ -25,7 +25,7 @@ ORIGIN = (35.628222, 139.738694)  # 品川駅
 
 def get_client(api_url: str, api_token: str) -> ApiClient:
     """
-    APIクライアント取得
+    REST API設定
 
     Args:
         api_url: APIのURL
@@ -69,7 +69,7 @@ def main(api_url: str, api_token: str, project_uuid: str, meas_uuid: str) -> Non
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Process measurement data and output to JSON."
+        description="Process get GNSS, caliculate distance and put it and count."
     )
     parser.add_argument("--api_url", required=True, help="URL of the intdash API")
     parser.add_argument("--api_token", required=True, help="API Token")

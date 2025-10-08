@@ -14,7 +14,7 @@ class ReplayService:
     """
     計測リプレイサービス
 
-    Attribute:
+    Attributes:
         reader (MeasurementReader): 計測取得
         writer (MeasurementWriter): 計測作成
         upstreamer (Upstreamer): アップストリーマー
@@ -144,24 +144,19 @@ class ReplayService:
         i = 0
         basetime_ns = int(basetime.timestamp() * 1_000_000) * 1_000
 
-        # WiP 厳密には計測の基準時刻をあわせるべき
-        start_time = iscp.DateTime.utcnow()
         while True:
             elapsed_time, type, name, data = await asyncio.wait_for(
                 self.datapoint_queue.get(), timeout
             )
 
-            elapsed_time_speed = int(elapsed_time / self.speed)
+            elapsed_time_replay = int(elapsed_time / self.speed)
             sleep_time = (
-                basetime_ns + elapsed_time_speed - iscp.DateTime.utcnow().unix_nano()
+                basetime_ns + elapsed_time_replay - iscp.DateTime.utcnow().unix_nano()
             ) / 1_000_000_000
 
             if sleep_time > 0:
                 await asyncio.sleep(sleep_time)
 
-            elapsed_time_replay = (
-                iscp.DateTime.utcnow().unix_nano() - start_time.unix_nano()
-            )
             await self.upstreamer.send(elapsed_time_replay, type, name, data)
             logging.info(
                 f"Sent : {i} {elapsed_time}, {type}, {name} {elapsed_time_replay}"
