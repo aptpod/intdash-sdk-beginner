@@ -25,7 +25,7 @@ ORIGIN = (35.628222, 139.738694)  # 品川駅
 
 def get_client(api_url: str, api_token: str) -> ApiClient:
     """
-    APIクライアント取得
+    REST API設定
 
     Args:
         api_url: APIのURL

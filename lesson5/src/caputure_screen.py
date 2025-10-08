@@ -59,8 +59,7 @@ async def connect(
     ping_timeout: float,
 ) -> iscp.Conn:
     """
-    サーバー接続
-
+    リアルタイムAPI接続
 
     Args:
         api_url (str): APIのURL
@@ -86,7 +85,7 @@ async def connect(
 
 def get_client(api_url: str, api_token: str) -> ApiClient:
     """
-    APIクライアント取得
+    REST API設定
 
     Args:
         api_url (str): APIのURL

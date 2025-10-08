@@ -30,7 +30,7 @@ async def connect(
     project_uuid: str,
 ) -> iscp.Conn:
     """
-    サーバー接続
+    リアルタイムAPI接続
 
 
     Args:

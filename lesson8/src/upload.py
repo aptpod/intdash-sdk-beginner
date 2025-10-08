@@ -34,7 +34,7 @@ PIPELINE = """
 
 def get_client(api_url: str, api_token: str) -> ApiClient:
     """
-    REST API接続
+    REST API設定
 
     Args:
         api_url (str): APIのURL
