@@ -20,5 +20,8 @@
 - [Windows](./setup_win.md)
 
 ## 詳細
-- [SDK入門⑦〜計測リプレイツールの作り方〜](https://tech.aptpod.co.jp/draft/entry/00vP-IN6h0vGE6aRguoRSpjdlG8)
+- [SDK入門⑦〜計測リプレイツールの作り方〜](https://tech.aptpod.co.jp/entry/2025/04/04/163000)
 
+
+## 制限
+- iSCPv1の計測は非対応

@@ -12,6 +12,7 @@ intdash SDK for Python 入門のサンプルプログラム集です。
 - [SDK入門⑤〜iPadでData Visualizerを見る会〜](./lesson5/docs/README.md)
 - [SDK入門⑥〜最速最高度で計測する日〜](./lesson6/docs/README.md)
 - [SDK入門⑦〜計測リプレイツールの作り方〜](./lesson7/docs/README.md)
+- [SDK入門⑧〜動画アップロードツールの作り方〜](./lesson8/docs/README.md)
 
 ## インストール
 ```
