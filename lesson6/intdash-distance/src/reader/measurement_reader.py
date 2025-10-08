@@ -15,7 +15,7 @@ class MeasurementReader:
     """
     計測取得
 
-    Attribute:
+    Attributes:
         client (ApiClient): APIクライアント
         project_uuid (str): プロジェクトUUID
         meas_uuid (str): 計測UUID
