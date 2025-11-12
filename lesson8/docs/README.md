@@ -25,4 +25,4 @@ MP4ファイルからH.264フレームを読み出して計測として登録し
 - [Windows](./setup_win.md)
 
 ## 詳細
-- [SDK入門⑧〜動画アップロードツールの作り方〜](https://tech.aptpod.co.jp/draft/entry/PWfo7k3Ug5qdC5XkWMScV_QeqIA) 
+- [SDK入門⑧〜動画アップロードツールの作り方〜](https://tech.aptpod.co.jp/entry/2025/10/16/150000) 
