@@ -3,7 +3,7 @@
 ## インストール
 
 [SDK入門①〜社用車で走ったとこ全部見せます〜](../../lesson1/docs/setup_mac.md) +<br>
-[SDK入門③〜RTSPで映像配信するぞ〜](../../lesson3/docs/setup_mac.md)
+[SDK入門③〜RTSPで映像配信するぞ〜](../../lesson3/docs/setup_mac.md) +
 
 ### メモリ使用量表示
 ```sh
