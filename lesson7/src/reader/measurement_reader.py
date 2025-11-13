@@ -1,7 +1,7 @@
 import base64
 import json
 from datetime import datetime
-from typing import Generator, Tuple
+from typing import Generator, Optional, Tuple
 
 from intdash import ApiClient
 from intdash.api import (
@@ -28,11 +28,11 @@ class MeasurementReader:
         self,
         client: ApiClient,
         project_uuid: str,
-        edge_uuid: str,
-        meas_uuid: str,
-        start: str | None = None,
-        end: str | None = None,
-        data_id_filter: list | None = None,
+        edge_uuid: Optional[str] = None,
+        meas_uuid: Optional[str] = None,
+        start: Optional[str] = None,
+        end: Optional[str] = None,
+        data_id_filter: Optional[list] = None,
     ) -> None:
         self.client = client
         self.project_uuid = project_uuid
@@ -88,7 +88,7 @@ class MeasurementReader:
         api = measurement_service_data_points_api.MeasurementServiceDataPointsApi(
             self.client
         )
-        params = {
+        params: dict[str, object] = {
             "project_uuid": self.project_uuid,
             "name": self.meas_uuid if self.meas_uuid else self.edge_uuid,
             "time_format": "ns",
