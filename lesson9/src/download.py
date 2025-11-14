@@ -77,7 +77,7 @@ def main(
         mux: トラック統合
     """
     logging.info(
-        f"Processing project_uuid: {project_uuid} meas_uuid: {meas_uuid}, edge_uuid: {edge_uuid} start: {start} end: {end} outdir: {outdir} tracks: {','.join(tracks)} fps: {fps} mux: {mux}"
+        f"Processing project_uuid: {project_uuid} meas_uuid: {meas_uuid} edge_uuid: {edge_uuid} start: {start} end: {end} outdir: {outdir} tracks: {','.join(tracks)} fps: {fps} mux: {mux}"
     )
     service = None
     try:
