@@ -39,8 +39,8 @@ npx @openapitools/openapi-generator-cli version
 
 ### intdash SDK for Python生成
 ```powershell
-set VERSION=v2.7.0
-set SRC_DIR=.
+$env:VERSION = "v2.7.0"
+$env:SRC_DIR = "."
 npx @openapitools/openapi-generator-cli version-manager set 6.1.0
 npx @openapitools/openapi-generator-cli generate `
 -g python `
