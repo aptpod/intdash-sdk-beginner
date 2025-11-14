@@ -9,6 +9,13 @@ brew install ffmpeg
 ffmpeg -version
 ```
 
+### 依存パッケージインストール
+```sh
+pip install numpy requests
+```
+
+### 利用
+
 ### サンプルプログラム
 #### 音声+映像+字幕、多重化
 ```sh

@@ -18,6 +18,11 @@
 ffmpeg -version
 ```
 
+### 依存パッケージインストール
+```powershell
+pip install numpy requests
+```
+
 ## 実行
 
 ### PYTHONPATH設定
