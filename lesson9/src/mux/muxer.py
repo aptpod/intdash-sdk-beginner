@@ -97,32 +97,29 @@ class Muxer:
         in_count = 0
 
         # video
-        if inputs.video and inputs.video.exists():
+        if inputs.video:
             v_idx = in_count
             in_count += 1
-            if inputs.video.suffix.lower() == ".h264":
-                fps = float(opts.video_fps)
-                cmd += [
-                    "-r",
-                    f"{fps:.6f}",
-                    "-fflags",
-                    "+genpts",
-                    "-itsoffset",
-                    f"{opts.v_offset:.6f}",
-                    "-i",
-                    str(inputs.video),
-                ]
-            else:
-                cmd += ["-itsoffset", f"{opts.v_offset:.6f}", "-i", str(inputs.video)]
+            fps = float(opts.video_fps)
+            cmd += [
+                "-r",
+                f"{fps:.6f}",
+                "-fflags",
+                "+genpts",
+                "-itsoffset",
+                f"{opts.v_offset:.6f}",
+                "-i",
+                str(inputs.video),
+            ]
 
         # audio
-        if inputs.audio and inputs.audio.exists():
+        if inputs.audio:
             a_idx = in_count
             in_count += 1
             cmd += ["-itsoffset", f"{opts.a_offset:.6f}", "-i", str(inputs.audio)]
 
         # subtitle
-        if inputs.subtitle and inputs.subtitle.exists():
+        if inputs.subtitle:
             s_idx = in_count
             in_count += 1
             cmd += ["-itsoffset", f"{opts.s_offset:.6f}", "-i", str(inputs.subtitle)]
