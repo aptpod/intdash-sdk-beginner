@@ -32,7 +32,7 @@ class MeasurementReader:
         meas_uuid: Optional[str] = None,
         start: Optional[str] = None,
         end: Optional[str] = None,
-        data_id_filter: Optional[list] = None,
+        data_id_filter: Optional[list[str]] = None,
     ) -> None:
         self.client = client
         self.project_uuid = project_uuid
