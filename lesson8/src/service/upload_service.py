@@ -14,7 +14,7 @@ class UploadService:
     MP4ファイル変換Gstreamerパイプライン、計測作成、フレーム送信を管理する
 
     Attributes:
-        converter (Convertor): AVCC→AnnexBコンバーター
+        convertor (Convertor): AVCC→AnnexBコンバーター
         writer (MeasurementWriter): 計測作成
     """
 
