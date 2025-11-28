@@ -19,7 +19,7 @@ java --version
 例: node-v22.11.0-x64.msi
 
 インストール先のパスが環境変数Pathに自動で追加されます。<br>
-例: C:\Users\sanka\AppData\Roaming\npm
+例: C:\Users\<username>\AppData\Roaming\npm
 
 ```powershell
 npm -v
@@ -39,8 +39,8 @@ npx @openapitools/openapi-generator-cli version
 
 ### intdash SDK for Python生成
 ```powershell
-set VERSION=v2.7.0
-set SRC_DIR=.
+$env:VERSION = "v2.7.0"
+$env:SRC_DIR = "."
 npx @openapitools/openapi-generator-cli version-manager set 6.1.0
 npx @openapitools/openapi-generator-cli generate `
 -g python `
@@ -61,7 +61,7 @@ dir intdash
 例: python-3.12.7-amd64.exe
 
 インストール先のパスを環境変数Pathに追加します。<br>
-例: C:\Users\sanka\AppData\Local\Programs\Python\Python312
+例: C:\Users\<username>\AppData\Local\Programs\Python\Python312
 
 ```powershell
 python --version
