@@ -2,6 +2,7 @@ intdash/
 gen/
 venv/
 
+
 *.pyc
 __pycache__/
 .mypy_cache/
@@ -10,6 +11,7 @@ __pycache__/
 openapitools.json
 .openapi-generator/
 intdash_README.md
+.openapi-generator-ignore
 
 proto
 buf.gen.yaml

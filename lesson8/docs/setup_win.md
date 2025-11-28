@@ -8,24 +8,24 @@
 ## 実行
 
 ### PYTHONPATH設定
-```sh
+```powershell
 echo $PYTHONPATH
 export PYTHONPATH=/path/to/your_workspace
 ```
 
 ### サンプルプログラム
 #### データ名=`video/h264` 基準時刻=現在時刻
-```sh
+```powershell
 python lesson8/src/upload.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --src_path <YOUR_MP4FILE>
 ```
 
 #### データ名指定
-```sh
+```powershell
 python lesson8/src/upload.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --src_path <YOUR_MP4FILE> --data_name <YOUR_DATA_NAME>
 ```
 
 #### 基準時刻指定
-```sh
+```powershell
 python lesson8/src/upload.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --src_path <YOUR_MP4FILE> --basetime <YOUR_BASETIME>
 ```
 
