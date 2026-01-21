@@ -32,6 +32,19 @@ class Upstreamer:
         self.up = await self.conn.open_upstream(session_id=session_id, persist=True)
         logging.info(f"Opened stream session_id {session_id}")
 
+    async def send_basetime(self, basetime: iscp.BaseTime) -> None:
+        """
+        基準時刻送信
+
+        Args:
+            basetime (BaseTime): 基準時刻
+        """
+        basetime.session_id = self.up.session_id
+        await self.conn.send_base_time(basetime, persist=True)
+        logging.info(
+            f"Sent basetime basetime.session_id {basetime.session_id} basetime.name {basetime.name}"
+        )
+
     async def send(
         self, elapsed_time: int, type: str, name: str, payload: bytes
     ) -> None:

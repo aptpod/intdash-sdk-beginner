@@ -20,7 +20,8 @@ class ReplayService:
         upstreamer (Upstreamer): アップストリーマー
         datapoint_queue (Queue[Any]): データポイントキュー
         speed (float): 再生倍速（speed倍速でリプレイ）
-        maxsize (int): キュー最大サイズ
+        basetime (iscp.DateTime): 新計測の基準時刻
+        datapoint_queue (asyncio.Queue): データポイントキュー
     """
 
     @staticmethod
@@ -44,6 +45,7 @@ class ReplayService:
         self.writer = writer
         self.upstreamer = upstreamer
         self.speed = speed
+        self.basetime: iscp.DateTime = None
         self.datapoint_queue: asyncio.Queue[Tuple[int, str, str, Any]] = asyncio.Queue(
             maxsize=maxsize
         )
@@ -57,6 +59,7 @@ class ReplayService:
 
         リプレイ用計測作成
         アップストリーム開始
+        基準時刻送信
         以下を並列実行
         - データポイント供給
             - REST APIから取得
@@ -73,13 +76,20 @@ class ReplayService:
             measurement = self.writer.create_measurement("Created by ReplayService")
             logging.info(f"Created measurement: {measurement.uuid}")
 
+            # アップストリーム開始
             await self.upstreamer.open(measurement.uuid)
+
+            # 基準時刻送信
+            self.basetime = iscp.DateTime.utcnow()
+            await self.upstreamer.send_basetime(
+                iscp.BaseTime(None, "NTP", 40, 0, self.basetime)
+            )
 
             feed_task = asyncio.create_task(
                 self.feed(self.reader.get_basetime())
             )  # データポイント供給
             fetch_task = asyncio.create_task(
-                self.fetch(measurement.basetime, read_timeout),
+                self.fetch(read_timeout),
             )  # データポイント取得
 
             await asyncio.gather(feed_task, fetch_task)
@@ -125,7 +135,7 @@ class ReplayService:
 
             ReplayService.log_memory_usage()
 
-    async def fetch(self, basetime: datetime, timeout: float) -> None:
+    async def fetch(self, timeout: float) -> None:
         """
         データポイント取出
 
@@ -135,15 +145,12 @@ class ReplayService:
         - アップストリーム
 
         Args:
-            basetime (int): 元計測の基準時刻
             timeout (float): キュー読み込みタイムアウト
 
         Raises:
             TimeoutError : キュー読み込みタイムアウト
         """
         i = 0
-        basetime_ns = int(basetime.timestamp() * 1_000_000) * 1_000
-
         while True:
             elapsed_time, type, name, data = await asyncio.wait_for(
                 self.datapoint_queue.get(), timeout
@@ -151,7 +158,9 @@ class ReplayService:
 
             elapsed_time_replay = int(elapsed_time / self.speed)
             sleep_time = (
-                basetime_ns + elapsed_time_replay - iscp.DateTime.utcnow().unix_nano()
+                self.basetime.unix_nano()
+                + elapsed_time_replay
+                - iscp.DateTime.utcnow().unix_nano()
             ) / 1_000_000_000
 
             if sleep_time > 0:
