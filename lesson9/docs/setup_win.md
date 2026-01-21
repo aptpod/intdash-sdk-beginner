@@ -47,6 +47,11 @@ python lesson9/src/download.py --api_url https://example.intdash.jp --api_token 
 python lesson9/src/download.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --meas_uuid <YOUR_MEAS_UUID> --tracks audio video --mux
 ```
 
+#### 音声(AAC)+映像、多重化
+```powershell
+python lesson9/src/download.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --meas_uuid <YOUR_MEAS_UUID> --tracks aac video --mux
+```
+
 #### 開始〜終了時刻指定
 ```powershell
 python lesson9/src/download.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --start YYYY-MM-DDThh:mm:ss.SSSSSS+HH:MM --end YYYY-MM-DDThh:mm:ss.SSSSSS+HH:MM

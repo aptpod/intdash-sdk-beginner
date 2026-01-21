@@ -25,7 +25,7 @@ Audio/Video/GNSSデータを取得して、WAV/H.264/字幕ファイルとして
 
 ## 制限
 - iSCPv1の計測は非対応
-- 音声データはS16LE（16bit Integer Little Endian）のみ対応
+- 音声データはPCM S16LE（16bit Integer Little Endian）、AACのみ対応
 - 映像データはH.264のみ対応
 - 映像データが欠落しているると、欠落フレーム分が詰められて音声とズレます
 - Windows Media PlayerはMP4の字幕トラックに対応していません
