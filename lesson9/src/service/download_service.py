@@ -4,6 +4,14 @@ from pathlib import Path
 from typing import Optional
 
 import numpy as np
+from const.const import (
+    DATA_NAME_AAC,
+    DATA_NAME_ALTITUDE,
+    DATA_NAME_COORDINATES,
+    DATA_NAME_H264,
+    DATA_NAME_PCM,
+    DATA_NAME_SPEED,
+)
 from convertor.audio.codec import decode_pcm_s16le, encode_pcm_s16le
 from convertor.audio.resampler import Resampler
 from convertor.subtitle.aggregator import Aggregator, SrtSegment
@@ -21,22 +29,24 @@ class DownloadConfig:
     ダウンロード設定
 
     Attributes:
-        emit_audio (bool): 音声トラック出力
+        audio_mode (str): 音声トラック出力形式 pcm/aac
         emit_video (bool): 映像トラック出力
         emit_subtitle (bool): 字幕トラック出力
         outdir (Path): 出力ディレクトリ
-        audio_name (str): 出力WAVファイル名
+        wav_name (str): 出力WAVファイル名
+        aac_name (str): 出力AACファイル名
         video_name (str): 出力H.264ファイル名
         srt_name (str): 出力SRTファイル名
         fps (int): 映像フレームレート（.h264入力のみ使用）
         mux (bool): MP4多重化
     """
 
-    emit_audio: bool = True
+    audio_mode: str | None = None
     emit_video: bool = True
     emit_subtitle: bool = True
     outdir: Path = Path("./out")
-    audio_name: str = "audio.wav"
+    wav_name: str = "audio.wav"
+    aac_name: str = "audio.aac"
     video_name: str = "video.h264"
     srt_name: str = "subtitle.srt"
     mp4_name: str = "out.mp4"
@@ -87,6 +97,7 @@ class DownloadService:
 
         # writers
         self._wav: Optional[WavWriter] = None
+        self._aac: Optional[BinWriter] = None
         self._h264: Optional[BinWriter] = None
         self._srt: Optional[SrtWriter] = None
 
@@ -133,7 +144,7 @@ class DownloadService:
                 continue
 
             # ------- PCM -------
-            if data_name == "1/pcm":
+            if data_name == DATA_NAME_PCM:
                 if self.resampler is None:
                     raise RuntimeError
                 if self._wav is None:
@@ -146,8 +157,16 @@ class DownloadService:
                     if self._t0_audio is None:
                         self._t0_audio = t_rel
 
+            # ------- AAC -------
+            if data_name == DATA_NAME_AAC:
+                if self._aac is None:
+                    raise RuntimeError
+                self._aac.write(data_bytes)
+                if self._t0_audio is None:
+                    self._t0_audio = t_rel
+
             # ------- H.264 -------
-            elif data_name == "1/h264":
+            elif data_name == DATA_NAME_H264:
                 if self._h264 is None:
                     raise RuntimeError
                 self._h264.write(data_bytes)
@@ -155,14 +174,14 @@ class DownloadService:
                     self._t0_video = t_rel
 
             # ------- GNSS: speed -------
-            elif data_name == "1/gnss_speed":
+            elif data_name == DATA_NAME_SPEED:
                 if len(data_bytes) >= 8:
                     v = np.frombuffer(data_bytes[:8], dtype=">f8")[0]
                     v = round(v, 1)
                     aggregator.update_speed(v)
 
             # ------- GNSS: altitude [tick] -------
-            elif data_name == "1/gnss_altitude":
+            elif data_name == DATA_NAME_ALTITUDE:
                 if len(data_bytes) >= 8:
                     alt = np.frombuffer(data_bytes[:8], dtype=">f8")[0]
                     alt = round(alt, 1)
@@ -174,7 +193,7 @@ class DownloadService:
                             self._t0_sub = seg.start
 
             # ------- GNSS: coordinates-------
-            elif data_name == "1/gnss_coordinates":
+            elif data_name == DATA_NAME_COORDINATES:
                 if len(data_bytes) >= 16:
                     lat, lon = np.frombuffer(data_bytes[:16], dtype=">f8")
                     changed, lat_q, lon_q = aggregator.update_latlon(lat, lon)
@@ -210,9 +229,12 @@ class DownloadService:
         """
         outdir = self.cfg.outdir
         outdir.mkdir(parents=True, exist_ok=True)
-        if self.cfg.emit_audio:
-            self._wav = WavWriter(outdir / self.cfg.audio_name, nch=1)
+        if self.cfg.audio_mode == "pcm":
+            self._wav = WavWriter(outdir / self.cfg.wav_name, nch=1)
             self._wav.open()
+        if self.cfg.audio_mode == "aac":
+            self._aac = BinWriter(outdir / self.cfg.aac_name)
+            self._aac.open()
         if self.cfg.emit_video:
             self._h264 = BinWriter(outdir / self.cfg.video_name)
             self._h264.open()
@@ -238,6 +260,9 @@ class DownloadService:
         if self._wav:
             self._wav.close()
             logging.info(f"[AUDIO] Exported WAV file: {self._wav.path}")
+        if self._aac:
+            self._aac.close()
+            logging.info(f"[AUDIO] Exported AAC file: {self._aac.path}")
         if self._h264:
             self._h264.close()
             logging.info(f"[VIDEO] Exported H.264 file: {self._h264.path}")
@@ -264,7 +289,11 @@ class DownloadService:
 
         # 出力トラック設定
         v = (self.cfg.outdir / self.cfg.video_name) if self.cfg.emit_video else None
-        a = (self.cfg.outdir / self.cfg.audio_name) if self.cfg.emit_audio else None
+        a = None
+        if self.cfg.audio_mode == "pcm":
+            a = self.cfg.outdir / self.cfg.wav_name
+        elif self.cfg.audio_mode == "aac":
+            a = self.cfg.outdir / self.cfg.aac_name
         s = (self.cfg.outdir / self.cfg.srt_name) if self.cfg.emit_subtitle else None
         inputs = MuxInputs(
             video=v if (v and v.exists()) else None,
