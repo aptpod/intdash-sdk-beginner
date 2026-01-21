@@ -4,6 +4,14 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+from const.const import (
+    DATA_NAME_AAC,
+    DATA_NAME_ALTITUDE,
+    DATA_NAME_COORDINATES,
+    DATA_NAME_H264,
+    DATA_NAME_PCM,
+    DATA_NAME_SPEED,
+)
 from convertor.audio.resampler import Resampler
 from convertor.subtitle.reverse_geocoder import ReverseGeocoder
 from mux.muxer import Muxer
@@ -19,11 +27,6 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)],
 )
-
-# 抽出データID (intdashの data_id_filter フォーマット)
-DATA_ID_AUDIO = ["#:1/pcm"]
-DATA_ID_VIDEO = ["#:1/h264"]
-DATA_ID_SUBTITLE = ["#:1/gnss_altitude", "#:1/gnss_speed", "#:1/gnss_coordinates"]
 
 
 def get_client(api_url: str, api_token: str) -> ApiClient:
@@ -41,6 +44,21 @@ def get_client(api_url: str, api_token: str) -> ApiClient:
     )
     client = ApiClient(configuration)
     return client
+
+
+def to_filter(*names: str) -> list[str]:
+    """
+    データID配列生成
+
+    #:<Data Name>
+    データ型名はワイルドカード固定
+
+    Params:
+        *names (str): データ名
+    Returns:
+        list: データID
+    """
+    return [f"#:{name}" for name in names]
 
 
 def main(
@@ -71,7 +89,7 @@ def main(
         start: 開始時刻
         end: 終了時刻
         outdir: 出力ディレクトリ
-        tracks: 出力トラック（audio, video, subtitle）
+        tracks: 出力トラック（pcm, aac, video, subtitle）
         fps: 計測データ映像のフレームレート
         gmap_api_key: Google API Key
         mux: トラック統合
@@ -84,25 +102,36 @@ def main(
         client = get_client(api_url, api_token)
 
         data_id_filter: list[str] = []
-        emit_audio = "audio" in tracks
-        if emit_audio:
-            data_id_filter.extend(DATA_ID_AUDIO)
+        emit_pcm = "pcm" in tracks
+        emit_aac = "aac" in tracks
+        if emit_pcm:
+            data_id_filter.extend(to_filter(DATA_NAME_PCM))
             resampler = Resampler()
+        if emit_aac:
+            data_id_filter.extend(to_filter(DATA_NAME_AAC))
         emit_video = "video" in tracks
         if emit_video:
-            data_id_filter.extend(DATA_ID_VIDEO)
+            data_id_filter.extend(to_filter(DATA_NAME_H264))
         emit_subtitle = "subtitle" in tracks
         if emit_subtitle:
-            data_id_filter.extend(DATA_ID_SUBTITLE)
+            data_id_filter.extend(
+                to_filter(DATA_NAME_ALTITUDE, DATA_NAME_SPEED, DATA_NAME_COORDINATES)
+            )
             geocoder = ReverseGeocoder(gmap_api_key) if gmap_api_key else None
 
         # 開始
         service = DownloadService(
-            DownloadConfig(emit_audio, emit_video, emit_subtitle, outdir, mux=mux),
+            DownloadConfig(
+                ("pcm" if emit_pcm else ("aac" if emit_aac else None)),
+                emit_video,
+                emit_subtitle,
+                outdir,
+                mux=mux,
+            ),
             MeasurementReader(
                 client, project_uuid, edge_uuid, meas_uuid, start, end, data_id_filter
             ),
-            resampler if emit_audio else None,
+            resampler if emit_pcm else None,
             geocoder if emit_subtitle else None,
             Muxer() if mux else None,
         )
@@ -139,7 +168,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--tracks",
         nargs="+",
-        choices=["audio", "video", "subtitle"],
+        choices=["audio", "pcm", "aac", "video", "subtitle"],
         default=["audio", "video", "subtitle"],
         help="Tracks exported",
     )
@@ -154,6 +183,13 @@ if __name__ == "__main__":
             "Either --meas_uuid must be specified, or --edge_uuid, --start, and --end must all be specified."
         )
 
+    # audio はデフォルトpcm
+    tracks = args.tracks
+    if ("audio" in tracks or "pcm" in tracks) and "aac" in tracks:
+        parser.error("Specify either --tracks pcm (or audio) or --tracks aac.")
+    if "audio" in tracks and "pcm" not in tracks:
+        tracks = [("pcm" if t == "audio" else t) for t in tracks]
+
     main(
         args.api_url,
         args.api_token,
@@ -163,7 +199,7 @@ if __name__ == "__main__":
         args.start,
         args.end,
         args.outdir,
-        args.tracks,
+        tracks,
         args.fps,
         args.gmap_api_key,
         args.mux,
