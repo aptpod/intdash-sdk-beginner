@@ -27,8 +27,8 @@ pip install numpy requests
 
 ### PYTHONPATH設定
 ```powershell
-echo $PYTHONPATH
-export PYTHONPATH=/path/to/your_workspace
+echo $env:PYTHONPATH
+$env:PYTHONPATH = "/path/to/your_workspace;"
 ```
 
 ### サンプルプログラム
