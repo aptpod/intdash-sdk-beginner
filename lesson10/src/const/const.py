@@ -7,7 +7,7 @@
 - 送受信データ設定
 - 画像要約設定
 - グリッド画像設定
-- GStreame パイプライン
+- GStreamer パイプライン
 """
 
 # iSCP設定
@@ -47,7 +47,7 @@ TEXT_SCALE = 0.9
 TEXT_COLOR = (133, 62, 215)  # D73E85 -> BGR
 TEXT_THICK = 1
 
-# GStreame パイプライン
+# GStreamer パイプライン
 # - H.264デコード
 # - JPEGエンコード
 DECODE_PIPELINE = """
