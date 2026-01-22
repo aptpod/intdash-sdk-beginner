@@ -21,7 +21,7 @@ class DetectService:
         encoder (Convertor): エンコーダー
         writer (MeasurementWriter): 計測作成
         upstreamer (Upstreamer): アップストリーマー
-        elapsed_time_queue (Queue): 基準時刻キュー
+        elapsed_time_queue (Queue): 経過時間キュー
         count_queue (Queue): 検出数キュー
     """
 
@@ -55,14 +55,14 @@ class DetectService:
         デコーダー、エンコーダーGstreamerパイプライン開始
         以下を並列実行
         - H.264データ供給
-            - ダウンストリームした基準時刻をキューに追加
+            - ダウンストリームした経過時間をキューに追加
             - ダウンストリームしたH.264データをGStreamerデコードパイプラインに渡す
         - 物体検出
             - デコードされたRAWフレームをOpenCVで物体検出して矩形描画
             - 検出人数キューに追加
             - RAWフレームをGStreamerエンコードパイプラインに渡す
         - H.264データ取得
-            - 基準時刻キューから基準時刻を取得
+            - 経過時間キューから経過時間を取得
             - エンコードされたH.264データをアップストリーム
             - 検出人数をアップストリーム
         データチャンク受信のタイムアウト時に計測完了
@@ -118,7 +118,7 @@ class DetectService:
             read_timeout (float): ダウンストリームタイムアウト (秒)
 
         - H.264データダウンストリーム
-        - 基準時刻キュー追加
+        - 経過時間キュー追加
         - デコーダー入力
         """
         async for elapsed_time, frame in self.downstreamer.read(read_timeout):
