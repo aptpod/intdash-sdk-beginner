@@ -1,7 +1,7 @@
 # Mac
 
 ## インストール
-[SDK入門④〜YOLOで物体検知しちゃう〜](./lesson4/docs/README.md) +
+[SDK入門④〜YOLOで物体検知しちゃう〜](../../lesson4/docs/README.md) +
 
 ### OpenAIパッケージインストール
 ```sh
