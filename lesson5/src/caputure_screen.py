@@ -3,6 +3,7 @@ import asyncio
 import logging
 import sys
 import urllib.parse
+from typing import Optional
 
 import iscp
 from convertor.convertor import Convertor
@@ -28,7 +29,6 @@ PING_TIMEOUT = 10.0  # 秒
 
 UP_DATA_NAME = "1/h264"
 
-TARGET_SIZE = 1920, 1080
 FPS = 15
 BITRATE = 3000  # kbps
 KEY_INT_MAX = FPS * 2
@@ -40,13 +40,7 @@ ENCODE_PIPELINE = """
     x264enc tune=zerolatency bitrate={bitrate} speed-preset=ultrafast key-int-max={key_int_max} aud=false !
     video/x-h264,stream-format=byte-stream !
     appsink name=sink sync=false emit-signals=true
-""".format(
-    width=TARGET_SIZE[0],
-    height=TARGET_SIZE[1],
-    fps=FPS,
-    bitrate=BITRATE,
-    key_int_max=KEY_INT_MAX,
-)
+"""
 
 
 async def connect(
@@ -100,7 +94,19 @@ def get_client(api_url: str, api_token: str) -> ApiClient:
     return client
 
 
-async def main(api_url: str, api_token: str, project_uuid: str, edge_uuid: str) -> None:
+async def main(
+    api_url: str,
+    api_token: str,
+    project_uuid: str,
+    edge_uuid: str,
+    monitor: int,
+    x: int,
+    y: int,
+    w: Optional[int],
+    h: Optional[int],
+    up_w: Optional[int],
+    up_h: Optional[int],
+) -> None:
     """
     メイン
 
@@ -114,8 +120,17 @@ async def main(api_url: str, api_token: str, project_uuid: str, edge_uuid: str) 
         api_token (str): 認証用のAPIトークン
         project_uuid (str): プロジェクトのUUID
         edge_uuid (str): エッジデバイスのUUID
+        monitor (int): モニター番号
+        x (int): キャプチャ範囲オフセット（左辺）
+        y (int): キャプチャ範囲オフセット（上辺）
+        w (int): キャプチャ範囲サイズ（幅）
+        h (int): キャプチャ範囲サイズ（高さ）
+        up_w (int): アップストリームサイズ（幅）
+        up_h (int): アップストリームサイズ（高さ）
     """
-    logging.info(f"Starting detect project_uuid: {project_uuid} edge_uuid: {edge_uuid}")
+    logging.info(
+        f"Starting capture project_uuid: {project_uuid} edge_uuid: {edge_uuid} monitor: {monitor} x: {x} y: {y} w: {w} h: {h} up_w: {up_w} up_h: {up_h}"
+    )
 
     try:
         conn = await connect(
@@ -128,9 +143,24 @@ async def main(api_url: str, api_token: str, project_uuid: str, edge_uuid: str) 
             PING_TIMEOUT,
         )
         client = get_client(api_url, api_token)
+        snapper = Snapper(
+            monitor,
+            (x, y),
+            (w, h) if w and h else None,
+            (up_w, up_h) if up_w and up_h else None,
+        )
+        up_w, up_h = snapper.get_resized_size()
         service = CaptureService(
-            Snapper(TARGET_SIZE),
-            Convertor(ENCODE_PIPELINE),
+            snapper,
+            Convertor(
+                ENCODE_PIPELINE.format(
+                    width=up_w,
+                    height=up_h,
+                    fps=FPS,
+                    bitrate=BITRATE,
+                    key_int_max=KEY_INT_MAX,
+                )
+            ),
             MeasurementWriter(client, project_uuid, edge_uuid),
             Upstreamer(conn, UP_DATA_NAME),
             FPS,
@@ -160,7 +190,49 @@ if __name__ == "__main__":
         help="Project UUID (default: 00000000-0000-0000-0000-000000000000)",
     )
     parser.add_argument("--edge_uuid", required=True, help="Edge UUID")
-
+    parser.add_argument(
+        "--monitor", type=int, required=False, default=1, help="Monitors number"
+    )
+    parser.add_argument(
+        "--x", type=int, required=False, default=0, help="Capture offset x"
+    )
+    parser.add_argument(
+        "--y", type=int, required=False, default=0, help="Capture offset y"
+    )
+    parser.add_argument(
+        "--w", type=int, required=False, default=None, help="Capture width"
+    )
+    parser.add_argument(
+        "--h", type=int, required=False, default=None, help="Capture height"
+    )
+    parser.add_argument(
+        "--up_w",
+        type=int,
+        required=False,
+        default=None,
+        help="Upstream width",
+    )
+    parser.add_argument(
+        "--up_h",
+        type=int,
+        required=False,
+        default=None,
+        help="Upstream height",
+    )
     args = parser.parse_args()
 
-    asyncio.run(main(args.api_url, args.api_token, args.project_uuid, args.edge_uuid))
+    asyncio.run(
+        main(
+            args.api_url,
+            args.api_token,
+            args.project_uuid,
+            args.edge_uuid,
+            args.monitor,
+            args.x,
+            args.y,
+            args.w,
+            args.h,
+            args.up_w,
+            args.up_h,
+        )
+    )
