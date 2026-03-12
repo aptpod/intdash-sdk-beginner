@@ -24,15 +24,21 @@
 - Disable access control
 
 ### Xクライアント設定
-- WindowsのIPを取得してDISPLAYに設定（WSLからWindowsを参照）
+- WindowsのIPを環境変数`DISPLAY`に設定（WSLからWindows側VcXsrvに接続）
 ```sh
 export DISPLAY=x.x.x.x:0
 export LIBGL_ALWAYS_INDIRECT=1
+```
+- 接続確認
+```sh
+xdpyinfo | head
 ```
 
 ### ブラウザインストール・起動
 - サンプルプログラムと別ウィンドウで実行
 ```sh
+sudo add-apt-repository ppa:savoury1/chromium
+sudo apt update
 sudo apt install chromium-browser
 chromium-browser
 ```
