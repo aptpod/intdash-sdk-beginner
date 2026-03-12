@@ -24,15 +24,21 @@
 - Disable access control
 
 ### Xクライアント設定
-- WindowsのIPを取得してDISPLAYに設定（WSLからWindowsを参照）
+- WindowsのIPを環境変数`DISPLAY`に設定（WSLからWindows側VcXsrvに接続）
 ```sh
 export DISPLAY=x.x.x.x:0
 export LIBGL_ALWAYS_INDIRECT=1
+```
+- 接続確認
+```sh
+xdpyinfo | head
 ```
 
 ### ブラウザインストール・起動
 - サンプルプログラムと別ウィンドウで実行
 ```sh
+sudo add-apt-repository ppa:savoury1/chromium
+sudo apt update
 sudo apt install chromium-browser
 chromium-browser
 ```
@@ -51,8 +57,28 @@ export PYTHONPATH=/path/to/your_workspace
 ```
 
 ### サンプルプログラム
+#### モニタ全体
 ```sh
 python lesson5/src/capture_screen.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID>
+```
+#### モニタ番号指定
+```sh
+python lesson5/src/capture_screen.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --monitor <YOUR_MONITOR_NUMBER>
+```
+
+#### キャプチャ範囲オフセット指定
+```sh
+python lesson5/src/capture_screen.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --x <OFFSET_X> --y <OFFSET_Y>
+```
+
+#### キャプチャ範囲オフセット・幅・高さ指定
+```sh
+python lesson5/src/capture_screen.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --x <OFFSET_X> --y <OFFSET_Y> --w <WIDTH> --h <HEIGHT>
+```
+
+#### リサイズ幅・高さ指定
+```sh
+python lesson5/src/capture_screen.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --up_w <UPSTREAM_WIDTH> --up_h <UPSTREAM_HEIGHT>
 ```
 
 ### 可視化
