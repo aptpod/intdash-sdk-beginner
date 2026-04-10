@@ -135,7 +135,7 @@ class Upstreamer:
             else "h264_frame/non_idr_frame"
         )
         await self.up.write_data_points(
-            iscp.DataID(name="10/h264", type=type),
+            iscp.DataID(name=self.data_name_video, type=type),
             iscp.DataPoint(
                 elapsed_time=elapsed_time,
                 payload=payload,
