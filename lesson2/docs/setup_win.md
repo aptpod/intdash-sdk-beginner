@@ -6,18 +6,11 @@
 
 ### Buf CLIインストール
 
-[Buf公式サイト](https://buf.build/docs/installation/)の「Downloads」セクションからWindows用のバイナリをダウンロードします。<br>
-例: buf-Windows-x86_64.exe
-
-buf.exeにリネームして任意のフォルダに配置します。<br>
-例: C:¥buf
-
-インストール先のパスを環境変数Pathに追加します。<br>
-例: C:¥buf
-
 ```powershell
+winget install -e --id bufbuild.buf
 buf --version
 ```
+
 ### Protocol Buffersエンコーダーの生成
 
 #### プロトコル定義ファイルのダウンロード
