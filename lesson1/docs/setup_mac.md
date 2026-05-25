@@ -2,6 +2,12 @@
 
 ## インストール
 
+### intdash-sdk-beginner 開発環境作成
+```sh
+git clone https://github.com/aptpod/intdash-sdk-beginner.git
+cd intdash-sdk-beginner
+```
+
 ### Javaインストール
 
 ```sh
