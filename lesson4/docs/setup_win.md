@@ -21,24 +21,28 @@ wsl --install
 wsl --set-default-version 2
 ```
 - Windows再起動
+- Ubuntu起動
 
-### Ubuntu 22.04インストール
-- Microsoft StoreでUbuntu 22.04.5 LTSを入手・インストールします。
+### intdash-sdk-beginner 開発環境作成
+```sh
+git clone https://github.com/aptpod/intdash-sdk-beginner.git
+cd intdash-sdk-beginner
+```
 
 ### Javaインストール
 ```sh
-java --version
 sudo apt update
-sudo apt install -y openjdk-17-jdk
+sudo apt install -y openjdk-25-jdk
+java --version
 ```
 
 ### npmインストール
 ```sh
-npm -v
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | bash
 source ~/.bashrc
 nvm install --lts
 nvm use --lts
+npm -v
 ```
 
 ### OpenAPI Generatorインストール
@@ -87,6 +91,8 @@ pip --version
 ### PyGObjectインストール
 ```sh
 sudo apt install python3-gi gir1.2-gstreamer-1.0
+
+# python3.10 はPythonのバージョン
 ln -s /usr/lib/python3/dist-packages/gi venv/lib/python3.10/site-packages/gi
 ln -s /usr/lib/python3/dist-packages/pygtkcompat venv/lib/python3.10/site-packages/pygtkcompat
 ```
