@@ -26,6 +26,7 @@
 ### Xクライアント設定
 - WindowsのIPを環境変数`DISPLAY`に設定（WSLからWindows側VcXsrvに接続）
 ```sh
+ip route
 export DISPLAY=x.x.x.x:0
 export LIBGL_ALWAYS_INDIRECT=1
 ```
@@ -36,11 +37,13 @@ xdpyinfo | head
 
 ### ブラウザインストール・起動
 - サンプルプログラムと別ウィンドウで実行
+- Xクライアント設定
 ```sh
-sudo add-apt-repository ppa:savoury1/chromium
 sudo apt update
-sudo apt install chromium-browser
-chromium-browser
+sudo apt install -y wget ca-certificates
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+sudo apt install -y ./google-chrome-stable_current_amd64.deb
+google-chrome-stable
 ```
 
 ### Pythonパッケージインストール
@@ -55,8 +58,9 @@ pip install mss
 echo $PYTHONPATH
 export PYTHONPATH=/path/to/your_workspace
 ```
-
 ### サンプルプログラム
+- Xクライアント設定
+
 #### モニタ全体
 ```sh
 python lesson5/src/capture_screen.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID>
