@@ -11,14 +11,15 @@ pip install boto3 requests types-requests pytest
 ### カスタムLambdaレイヤー作成
 #### 依存パッケージインストール
 ```powershell
-mkdir -p path\to\workdir\python\lib\python3.12\site-packages
-pip3.12 install pydantic python-dateutil urllib3 -t path\to\workdir\python\lib\python3.12\site-packages
-pip3.12 install protobuf -t path\to\workdir\python\lib\python3.12\site-packages
+# python3.14 はPythonのバージョン
+mkdir -p path\to\workdir\python\lib\python3.14\site-packages
+pip3.14 install pydantic python-dateutil urllib3 -t path\to\workdir\python\lib\python3.14\site-packages
+pip3.14 install protobuf -t path\to\workdir\python\lib\python3.14\site-packages
 ```
 
 #### ZIPファイル作成
 ```powershell
-Copy-Item -Path intdash, gen -Destination path\to\workdir\python\lib\python3.12\site-packages\ -Recurse
+Copy-Item -Path intdash, gen -Destination path\to\workdir\python\lib\python3.14\site-packages\ -Recurse
 cd path\to\workdir
 Get-ChildItem -Path . -Recurse -Filter "*.pyc" | Remove-Item -Force
 Get-ChildItem -Path . -Recurse -Directory -Filter "__pycache__" | Remove-Item -Recurse -Force

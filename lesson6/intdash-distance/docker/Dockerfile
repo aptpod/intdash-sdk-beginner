@@ -86,10 +86,10 @@ RUN ls -l gen
 # Pythonインストール
 # -------------------------------------------------------------------
 RUN apt-get update && apt-get install -y \
-    python3.12 \
-    python3.12-dev \
-    python3.12-venv \
-    && python3.12 -m venv ${HOME}/venv
+    python3.14 \
+    python3.14-dev \
+    python3.14-venv \
+    && python3.14 -m venv ${HOME}/venv
 RUN ${HOME}/venv/bin/python -m pip install --upgrade pip
 
 # -------------------------------------------------------------------
@@ -107,9 +107,9 @@ RUN apt-get update && apt-get install -y \
 # -------------------------------------------------------------------
 # Lambdaレイヤー用ZIPファイル生成
 # -------------------------------------------------------------------
-RUN mkdir -p /layer/python/lib/python3.12/site-packages
-RUN cp -r intdash gen ${HOME}/venv/lib/python3.12/site-packages/* /layer/python/lib/python3.12/site-packages
-RUN ls -l /layer/python/lib/python3.12/site-packages
+RUN mkdir -p /layer/python/lib/python3.14/site-packages
+RUN cp -r intdash gen ${HOME}/venv/lib/python3.14/site-packages/* /layer/python/lib/python3.14/site-packages
+RUN ls -l /layer/python/lib/python3.14/site-packages
 RUN cd /layer \
     && find /layer -name "*.pyc" -delete \
     && find /layer -name "__pycache__" -type d -exec rm -r {} + \

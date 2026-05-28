@@ -11,14 +11,15 @@ pip install boto3 requests types-requests pytest
 ### カスタムLambdaレイヤー作成
 #### 依存パッケージインストール
 ```sh
-mkdir -p path/to/workdir/python/lib/python3.12/site-packages
-pip3.12 install pydantic python-dateutil urllib3 -t path/to/workdir/python/lib/python3.12/site-packages
-pip3.12 install protobuf -t path/to/workdir/python/lib/python3.12/site-packages
+# python3.14 はPythonのバージョン
+mkdir -p path/to/workdir/python/lib/python3.14/site-packages
+pip3.14 install pydantic python-dateutil urllib3 -t path/to/workdir/python/lib/python3.14/site-packages
+pip3.14 install protobuf -t path/to/workdir/python/lib/python3.14/site-packages
 ```
 
 #### ZIPファイル作成
 ```sh
-cp -r intdash gen path/to/workdir/python/lib/python3.12/site-packages
+cp -r intdash gen path/to/workdir/python/lib/python3.14/site-packages
 cd path/to/workdir
 find . -name "*.pyc" -delete
 find . -name "__pycache__" -type d -exec rm -r {} +

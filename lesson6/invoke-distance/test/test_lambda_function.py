@@ -1,10 +1,20 @@
 import os
+from typing import Any
+from unittest.mock import patch
 
 from src.lambda_function import lambda_handler
 
 
-def test_200_invoked() -> None:
+@patch("src.lambda_function.boto3.client")
+def test_200_invoked(mock_boto3_client: Any, monkeypatch: Any) -> None:
     os.environ["SECRET_KEY"] = "stringstringstringstringstringst"
+    os.environ["AWS_DEFAULT_REGION"] = "ap-northeast-1"
+
+    mock_lambda_client = mock_boto3_client.return_value
+    mock_lambda_client.invoke.return_value = {
+        "StatusCode": 202,
+        "Payload": None,
+    }
 
     event = {
         "headers": {
@@ -27,3 +37,4 @@ def test_200_invoked() -> None:
     result = lambda_handler(event, context)
     assert result["statusCode"] == 200
     assert "Webhook received and Distance Lambda invoked" in result["body"]
+    mock_lambda_client.invoke.assert_called_once()

@@ -92,9 +92,9 @@ pip --version
 ```sh
 sudo apt install python3-gi gir1.2-gstreamer-1.0
 
-# python3.10 はPythonのバージョン
-ln -s /usr/lib/python3/dist-packages/gi venv/lib/python3.10/site-packages/gi
-ln -s /usr/lib/python3/dist-packages/pygtkcompat venv/lib/python3.10/site-packages/pygtkcompat
+# python3.14 はPythonのバージョン
+ln -s /usr/lib/python3/dist-packages/gi venv/lib/python3.14/site-packages/gi
+ln -s /usr/lib/python3/dist-packages/pygtkcompat venv/lib/python3.14/site-packages/pygtkcompat
 ```
 
 ### 依存パッケージインストール
