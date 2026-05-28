@@ -81,6 +81,32 @@ class HookManager:
         """
         return self.api.delete_project_webhook(self.project_uuid, hook_uuid)
 
+    def enable(self, hook_uuid: str) -> HookProjectCreateResponse:
+        """
+        有効化
+
+        Args:
+            hook_uuid (str): Webhook UUID
+
+        Returns:
+            dict: Webhook設定
+        """
+        hook = self.api.enable_project_webhook(self.project_uuid, hook_uuid)
+        return hook
+
+    def disable(self, hook_uuid: str) -> HookProjectCreateResponse:
+        """
+        無効化
+
+        Args:
+            hook_uuid (str): Webhook UUID
+
+        Returns:
+            dict: Webhook設定
+        """
+        hook = self.api.disable_project_webhook(self.project_uuid, hook_uuid)
+        return hook
+
     def test(self, hook_uuid: str, resource_type: str, action: str) -> Any:
         """
         テスト

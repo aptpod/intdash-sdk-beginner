@@ -50,6 +50,8 @@ def main() -> None:
             export: 取得
             import: 登録
             delete: 削除
+            enable: 有効化
+            disable: 無効化
             test: テスト
                 設定に登録されているurlにHook Requestを送信する
     """
@@ -97,6 +99,20 @@ def main() -> None:
         "--hook_uuid", required=True, help="UUID of the webhook to delete."
     )
 
+    enable_parser = subparsers.add_parser(
+        "enable", help="Enable a webhook configuration."
+    )
+    enable_parser.add_argument(
+        "--hook_uuid", required=True, help="UUID of the webhook to enable."
+    )
+
+    disable_parser = subparsers.add_parser(
+        "disable", help="Disable a webhook configuration."
+    )
+    disable_parser.add_argument(
+        "--hook_uuid", required=True, help="UUID of the webhook to disable."
+    )
+
     test_parser = subparsers.add_parser("test", help="Test a webhook configuration.")
     test_parser.add_argument(
         "--hook_uuid", required=True, help="UUID of the webhook to test."
@@ -135,6 +151,14 @@ def main() -> None:
         elif args.command == "delete":
             manager.delete(args.hook_uuid)
             logging.info(f"Deleted Hook hook_uuid:{args.hook_uuid}")
+
+        elif args.command == "enable":
+            hook_res = manager.enable(args.hook_uuid)
+            logging.info(f"Enabled Hook\n{hook_res}")
+
+        elif args.command == "disable":
+            hook_res = manager.disable(args.hook_uuid)
+            logging.info(f"Disabled Hook\n{hook_res}")
 
         elif args.command == "test":
             delivery = manager.test(args.hook_uuid, args.resource_type, args.action)
