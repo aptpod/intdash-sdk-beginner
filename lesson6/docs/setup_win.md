@@ -3,21 +3,23 @@
 ## ローカルPCインストール
 ### Python依存パッケージインストール
 ```powershell
-pip install boto3 requests pytest
+pip install boto3 requests types-requests pytest
 ```
+`types-requests`は My Type Checker の警告回避のため。
 
 ## AWS構築
 ### カスタムLambdaレイヤー作成
 #### 依存パッケージインストール
 ```powershell
-mkdir -p path\to\workdir\python\lib\python3.12\site-packages
-pip3.12 install pydantic python-dateutil urllib3 -t path\to\workdir\python\lib\python3.12\site-packages
-pip3.12 install protobuf -t path\to\workdir\python\lib\python3.12\site-packages
+# python3.14 はPythonのバージョン
+mkdir -p path\to\workdir\python\lib\python3.14\site-packages
+pip3.14 install pydantic python-dateutil urllib3 -t path\to\workdir\python\lib\python3.14\site-packages
+pip3.14 install protobuf -t path\to\workdir\python\lib\python3.14\site-packages
 ```
 
 #### ZIPファイル作成
 ```powershell
-Copy-Item -Path intdash, gen -Destination path\to\workdir\python\lib\python3.12\site-packages\ -Recurse
+Copy-Item -Path intdash, gen -Destination path\to\workdir\python\lib\python3.14\site-packages\ -Recurse
 cd path\to\workdir
 Get-ChildItem -Path . -Recurse -Filter "*.pyc" | Remove-Item -Force
 Get-ChildItem -Path . -Recurse -Directory -Filter "__pycache__" | Remove-Item -Recurse -Force
@@ -45,7 +47,7 @@ docker run --name lambda-layer lambda-layer
 docker cp lambda-layer:/intdash_sdk.zip ./intdash_sdk.zip
 ```
 
-### Lambda関数作成
+### 距離算出Lambda関数作成
 
 #### ZIPファイル作成
 ```powershell
@@ -77,6 +79,9 @@ Lambdaコード画面に`lesson6/invoke-distance/src/lambda_function.py`の内�
 
 #### 環境変数設定
 - `SECRET_KEY`: Webhook設定に登録する任意の文字列
+
+#### IAMロール追加
+レスポンス返却Lambdaに距離算出Lambdaの実行許可ポリシーを付与する。
 
 ### API Gateway作成
 POSTリクエストを受けるAPI Gatewayを作成します。
@@ -125,6 +130,20 @@ python lesson6/cli/src/hook_cli.py --api_url https://example.intdash.jp --api_to
 python lesson6/cli/src/hook_cli.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> delete --hook_uuid <YOUR_HOOK_UUID>
 ```
 
+#### `enable`: 有効化
+1つのWebhook設定を有効化します。
+
+```powershell
+python lesson6/cli/src/hook_cli.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> enable --hook_uuid <YOUR_HOOK_UUID>
+```
+
+#### `disable`: 無効化
+1つのWebhook設定を無効化します。
+
+```powershell
+python lesson6/cli/src/hook_cli.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> disable --hook_uuid <YOUR_HOOK_UUID>
+```
+
 #### `test`: テスト
 既存のWebhook設定をテストします。
 
@@ -137,7 +156,7 @@ python lesson6/cli/src/hook_cli.py --api_url https://example.intdash.jp --api_to
 
 ```powershell
 export API_TOKEN=<YOUR_API_TOKEN>
-curl -i -X PATCH https://example.intdash.jp/api/v1/webhook/hooks/<YOUR_HOOK_UUID>/test \
+curl -i -X PUT https://example.intdash.jp/api/v1/webhook/projects/<YOUR_PROJECT_UUID>/hooks/<YOUR_HOOK_UUID>/test \
 -H "X-Intdash-Token: ${API_TOKEN}" \
 -d '{
   "resource_type": "measurement",
@@ -166,7 +185,7 @@ pytest -v -p no:warnings lesson6/intdash-distance/test/test_lambda_function.py
 
 ##### レスポンス返却プログラム
 
-テストコード`lesson6/intdash-distance/test/test_lambda_function.py`を修正します。
+テストコード`lesson6/invoke-distance/test/test_lambda_function.py`を修正します。
 
 - 環境変数
   - `SECRET_KEY`
@@ -174,7 +193,7 @@ pytest -v -p no:warnings lesson6/intdash-distance/test/test_lambda_function.py
 テストコードを起動します。
 
 ```powershell
-pytest -v -p no:warnings lesson6/intdash-distance/test/test_lambda_function.py
+pytest -v -p no:warnings lesson6/invoke-distance/test/test_lambda_function.py
 ```
 
 #### 計測
@@ -190,6 +209,6 @@ pytest -v -p no:warnings lesson6/intdash-distance/test/test_lambda_function.py
 Motionのデータ収集を停止します。
 
 ### 可視化
-Data Visualizerに[Datファイル](../intdash-distance/dat/Distance.dat)をインポート
+Data Visualizerに[Datファイル](../../lesson2/distance/dat/Distance.dat)をインポート
 
 Slack通知のData Visualizerのリンクをクリック

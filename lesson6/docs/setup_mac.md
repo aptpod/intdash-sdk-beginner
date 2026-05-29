@@ -11,20 +11,22 @@ pip install boto3 requests types-requests pytest
 ### カスタムLambdaレイヤー作成
 #### 依存パッケージインストール
 ```sh
-mkdir -p path/to/workdir/python/lib/python3.12/site-packages
-pip3.12 install pydantic python-dateutil urllib3 -t path/to/workdir/python/lib/python3.12/site-packages
-pip3.12 install protobuf -t path/to/workdir/python/lib/python3.12/site-packages
+# python3.14 はPythonのバージョン
+mkdir -p path/to/workdir/python/lib/python3.14/site-packages
+pip3.14 install pydantic python-dateutil urllib3 -t path/to/workdir/python/lib/python3.14/site-packages
+pip3.14 install protobuf -t path/to/workdir/python/lib/python3.14/site-packages
 ```
 
 #### ZIPファイル作成
 ```sh
-cp -r intdash gen path/to/workdir/python/lib/python3.12/site-packages
+cp -r intdash gen path/to/workdir/python/lib/python3.14/site-packages
 cd path/to/workdir
 find . -name "*.pyc" -delete
 find . -name "__pycache__" -type d -exec rm -r {} +
 zip -r intdash_sdk.zip python
 ls -l intdash_sdk.zip python
 ```
+
 ### カスタムLambdaレイヤー作成（Dockerコンテナ利用）
 ローカルPCでDockerが起動しているなら、DockerfileでZIPファイルを生成できます。
 
@@ -76,6 +78,9 @@ Lambdaコード画面に`lesson6/invoke-distance/src/lambda_function.py`の内�
 #### 環境変数設定
 - `SECRET_KEY`: Webhook設定に登録する任意の文字列
 
+#### IAMロール追加
+レスポンス返却Lambdaに距離算出Lambdaの実行許可ポリシーを付与する。
+
 ### API Gateway作成
 POSTリクエストを受けるAPI Gatewayを作成します。
 
@@ -123,6 +128,20 @@ python lesson6/cli/src/hook_cli.py --api_url https://example.intdash.jp --api_to
 python lesson6/cli/src/hook_cli.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> delete --hook_uuid <YOUR_HOOK_UUID>
 ```
 
+#### `enable`: 有効化
+1つのWebhook設定を有効化します。
+
+```sh
+python lesson6/cli/src/hook_cli.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> enable --hook_uuid <YOUR_HOOK_UUID>
+```
+
+#### `disable`: 無効化
+1つのWebhook設定を無効化します。
+
+```sh
+python lesson6/cli/src/hook_cli.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> disable --hook_uuid <YOUR_HOOK_UUID>
+```
+
 #### `test`: テスト
 既存のWebhook設定をテストします。
 
@@ -135,7 +154,7 @@ python lesson6/cli/src/hook_cli.py --api_url https://example.intdash.jp --api_to
 
 ```sh
 export API_TOKEN=<YOUR_API_TOKEN>
-curl -i -X PATCH https://example.intdash.jp/api/v1/webhook/hooks/<YOUR_HOOK_UUID>/test \
+curl -i -X PUT https://example.intdash.jp/api/v1/webhook/projects/<YOUR_PROJECT_UUID>/hooks/<YOUR_HOOK_UUID>/test \
 -H "X-Intdash-Token: ${API_TOKEN}" \
 -d '{
   "resource_type": "measurement",
@@ -164,7 +183,7 @@ pytest -v -p no:warnings lesson6/intdash-distance/test/test_lambda_function.py
 
 ##### レスポンス返却プログラム
 
-テストコード`lesson6/intdash-distance/test/test_lambda_function.py`を修正します。
+テストコード`lesson6/invoke-distance/test/test_lambda_function.py`を修正します。
 
 - 環境変数
   - `SECRET_KEY`
@@ -172,7 +191,7 @@ pytest -v -p no:warnings lesson6/intdash-distance/test/test_lambda_function.py
 テストコードを起動します。
 
 ```sh
-pytest -v -p no:warnings lesson6/intdash-distance/test/test_lambda_function.py
+pytest -v -p no:warnings lesson6/invoke-distance/test/test_lambda_function.py
 ```
 
 #### 計測

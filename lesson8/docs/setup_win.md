@@ -1,9 +1,67 @@
-# Windows 
+# Windows
 
 ## インストール
 [SDK入門①〜社用車で走ったとこ全部見せます〜](../../lesson1/docs/setup_win.md) +<br>
-[SDK入門②〜データ移行ツールの作り方〜](../../lesson2/docs/setup_win.md) +<br>
 [SDK入門④〜YOLOで物体検知しちゃう〜](../../lesson4/docs/setup_win.md)
+
+### Buf CLIインストール
+
+```sh
+sudo apt update
+sudo apt install -y curl ca-certificates
+
+VERSION="1.70.0"
+
+curl -sSL \
+  "https://github.com/bufbuild/buf/releases/download/v${VERSION}/buf-$(uname -s)-$(uname -m)" \
+  -o /tmp/buf
+
+sudo install -m 0755 /tmp/buf /usr/local/bin/buf
+rm /tmp/buf
+
+buf --version
+```
+### Protocol Buffersエンコーダーの生成
+
+#### プロトコル定義ファイルのダウンロード
+[intdash API specificationページ](https://docs.intdash.jp/api/intdash-api/v2.7.0/spec_public.html#tag/MeasurementService_Measurement-Sequences/operation/createProjectMeasurementSequenceChunks)から[プロトコル定義ファイルページ](https://docs.intdash.jp/api/measurement/v1.18/proto/index.html)に遷移し、プロトコル定義ファイル `protocol.proto` をダウンロードします。
+
+
+#### プロトコル定義ファイル配置
+```sh
+mkdir -p proto/intdash/v1/ 
+cp path/to/protocol.proto proto/intdash/v1/  
+sed -i -e "s/package pb;/package intdash.v1;/g" proto/intdash/v1/protocol.proto
+```
+
+#### Buf CLI定義ファイル作成
+```sh
+cat << EOS > ./proto/buf.yaml
+version: v1
+breaking:
+  use:
+    - FILE
+lint:
+  use:
+    - DEFAULT
+EOS
+
+cat << EOS > ./buf.gen.yaml
+version: v1
+managed:
+  enabled: true
+plugins:
+  - plugin: buf.build/protocolbuffers/python:v23.4
+    out: gen
+EOS
+
+buf generate proto
+ls -l gen
+```
+### protobufパッケージインストール
+```sh
+pip install protobuf
+```
 
 ## 実行
 

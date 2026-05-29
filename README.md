@@ -20,3 +20,19 @@ intdash SDK for Python 入門のサンプルプログラム集です。
 ```
 git clone https://github.com/k-ise/intdash-sdk-beginner.git
 ```
+
+## 動作確認環境
+
+### macOS
+- macOS 26.3
+- Python 3.12.8
+
+### Windows
+- Windows 11
+- Python 3.14.5
+
+### WSL2
+Gstreamer利用時
+- Ubuntu 26.04 LTS
+- Python 3.14.4
+

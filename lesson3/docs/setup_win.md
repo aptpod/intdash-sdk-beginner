@@ -9,17 +9,8 @@ pip install iscp
 ```
 
 ### FFmpegインストール
-[FFmpeg公式サイト](https://ffmpeg.org/download.html)からWindows用のバイナリをダウンロードします。<br>
-例: ffmpeg-release-full.7z
-
-展開して任意のフォルダに配置します。<br>
-例: C:¥ffmpeg-7.0.2
-
-インストール先のパスを環境変数Pathに追加します。<br>
-例: C:¥ffmpeg-7.0.2
-
-
 ```powershell
+winget install ffmpeg
 ffmpeg -version
 ```
 
@@ -38,7 +29,7 @@ ffmpeg -version
 ### MediaMTX
 ```powershell
 cd /path/to/yml_directory
-mediamtx
+.\mediamtx.exe
 ```
 
 ### PYTHONPATH設定

@@ -2,6 +2,12 @@
 
 ## インストール
 
+### intdash-sdk-beginner 開発環境作成
+```powershell
+git clone https://github.com/aptpod/intdash-sdk-beginner.git
+cd intdash-sdk-beginner
+```
+
 ### Javaインストール
 
 [Java公式サイト](https://www.oracle.com/java/technologies/javase-downloads.html)からインストーラーをダウンロードします。<br>
