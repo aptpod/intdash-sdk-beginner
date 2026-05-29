@@ -14,12 +14,12 @@
 
 ## 依存関係
 - REST API用intdash SDK for Python>=v2.7.0
-- pydantic>=2.9.2
+- pydantic>=2.13.4
 - python-dateutil>=2.9.0.post0
-- urllib3>=2.2.3
+- urllib3>=2.7.0
 - Protocol Buffersエンコーダー==intdash.v1
-- protobuf>=5.28.3
-- psutil>=7.0.0
+- protobuf>=7.35.0
+- psutil>=7.2.2
 
 ## インストール&実行
 
