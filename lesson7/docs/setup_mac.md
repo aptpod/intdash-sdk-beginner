@@ -20,26 +20,32 @@ export PYTHONPATH=/path/to/your_workspace
 
 ### リプレイ
 #### 計測指定
+#### デフォルトプロジェクト
 ```sh
-python lesson7/src/replay.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --meas_uuid <YOUR_MEAS_UUID> 
+python lesson7/src/replay.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --meas_uuid <YOUR_MEAS_UUID>
 ```
+#### プロジェクト指定
+```sh
+python lesson7/src/replay.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --meas_uuid <YOUR_MEAS_UUID> --dst_project_uuid <YOUR_DST_PROJECT_UUID>
+```
+
 #### 開始〜終了時刻指定
 ```sh
-python lesson7/src/replay.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --start YYYY-MM-DDThh:mm:ss.SSSSSS+HH:MM --end YYYY-MM-DDThh:mm:ss.SSSSSS+HH:MM
+python lesson7/src/replay.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --edge_uuid <YOUR_EDGE_UUID> --start YYYY-MM-DDThh:mm:ss.SSSSSS+HH:MM --end YYYY-MM-DDThh:mm:ss.SSSSSS+HH:MM
 ```
 または
 ```sh
-python lesson7/src/replay.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --start YYYY-MM-DDThh:mm:ss.SSSSSSZ --end YYYY-MM-DDThh:mm:ss.SSSSSSZ
+python lesson7/src/replay.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --edge_uuid <YOUR_EDGE_UUID> --start YYYY-MM-DDThh:mm:ss.SSSSSSZ --end YYYY-MM-DDThh:mm:ss.SSSSSSZ
 ```
 
 #### データフィルター指定
 ```sh
-python lesson7/src/replay.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --meas_uuid <YOUR_MEAS_UUID> --data_id_filter <DATA_TYPE>:<DATA_NAME>,<DATA_TYPE>:<DATA_NAME>
+python lesson7/src/replay.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --meas_uuid <YOUR_MEAS_UUID> --data_id_filter <DATA_TYPE>:<DATA_NAME>,<DATA_TYPE>:<DATA_NAME>
 ```
 
 #### 倍速指定
 ```sh
-python lesson7/src/replay.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --meas_uuid <YOUR_MEAS_UUID> --speed <SPEED>
+python lesson7/src/replay.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --meas_uuid <YOUR_MEAS_UUID> --speed <SPEED>
 ```
 
 #### 別環境指定
