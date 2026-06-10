@@ -22,7 +22,7 @@ logging.basicConfig(
 
 PORT = 443
 READ_TIMEOUT = 0.5 * 60.0  # 秒
-PING_INTERVAL = 10 * 60.0  # 秒
+PING_INTERVAL = 10.0  # 秒
 PING_TIMEOUT = 10.0  # 秒
 
 
