@@ -24,7 +24,7 @@ logging.basicConfig(
 
 PORT = 443
 READ_TIMEOUT = 5 * 60.0  # 秒
-PING_INTERVAL = 10 * 60.0  # 秒
+PING_INTERVAL = 10.0  # 秒
 PING_TIMEOUT = 10.0  # 秒
 
 DOWN_DATA_NAME = "1/h264"
@@ -32,7 +32,7 @@ UP_DATA_NAME_VIDEO = "10/h264"
 UP_DATA_NAME_COUNT = "11/detect_count"
 
 TARGET_SIZE = 640, 480
-CONFIDENCE_THRESHOULD = 0.2
+CONFIDENCE_THRESHOLD = 0.2
 
 FPS = 15
 BITRATE = 3000  # kbps
@@ -167,7 +167,7 @@ async def main(
                 CONFIG_PATH,
                 NAMES_PATH,
                 TARGET_SIZE,
-                CONFIDENCE_THRESHOULD,
+                CONFIDENCE_THRESHOLD,
             ),
             Convertor(ENCODE_PIPELINE),
             MeasurementWriter(client, project_uuid, dst_edge_uuid),
