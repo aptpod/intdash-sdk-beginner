@@ -31,7 +31,7 @@ logging.basicConfig(
 
 def get_client(api_url: str, api_token: str) -> ApiClient:
     """
-    REST API設定
+    REST APIクライアント生成
 
     Args:
         api_url (str): APIのURL
@@ -145,14 +145,14 @@ def main(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Download datapoint and export audio(.wav)/video(.h264)/subtitle(.srt) ."
+        description="Download datapoints and export audio(.wav)/video(.h264)/subtitle(.srt)."
     )
-    parser.add_argument("--api_url", required=True, help="URL of intdash API")
+    parser.add_argument("--api_url", required=True, help="URL of the intdash API")
     parser.add_argument("--api_token", required=True, help="API Token")
     parser.add_argument(
         "--project_uuid",
         default="00000000-0000-0000-0000-000000000000",
-        help="Project UUID",
+        help="Project UUID (default: 00000000-0000-0000-0000-000000000000)",
     )
     parser.add_argument("--meas_uuid", required=False, help="Source Measurement UUID")
     parser.add_argument("--edge_uuid", required=False, help="Source Edge UUID")

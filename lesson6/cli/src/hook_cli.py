@@ -24,7 +24,7 @@ logging.basicConfig(
 
 def get_client(api_url: str, api_token: str) -> ApiClient:
     """
-    REST API設定
+    REST APIクライアント生成
 
     Args:
         api_url: APIのURL
@@ -57,12 +57,12 @@ def main() -> None:
     """
     # 引数チェック
     parser = argparse.ArgumentParser(description="Webhook configuration CLI tool.")
-    parser.add_argument("--api_url", required=True, help="URL of the API.")
-    parser.add_argument("--api_token", required=True, help="API token.")
+    parser.add_argument("--api_url", required=True, help="URL of the intdash API")
+    parser.add_argument("--api_token", required=True, help="API Token")
     parser.add_argument(
         "--project_uuid",
         default="00000000-0000-0000-0000-000000000000",
-        help="Project UUID.",
+        help="Project UUID (default: 00000000-0000-0000-0000-000000000000)",
     )
 
     subparsers = parser.add_subparsers(dest="command", required=True)
