@@ -42,7 +42,7 @@ CONFIG_PATH = "./lesson4/config/yolov4-tiny.cfg"
 NAMES_PATH = "./lesson4/config/coco.names"
 
 
-# GStreame H.264デコードパイプライン
+# GStreamer H.264デコードパイプライン
 DECODE_PIPELINE = """
     appsrc name=src is-live=true format=time caps=video/x-h264,stream-format=byte-stream ! 
     h264parse config-interval=-1 ! avdec_h264 ! videoconvert ! video/x-raw,format=BGR !
@@ -54,7 +54,7 @@ ENCODE_PIPELINE = """
     appsrc name=src is-live=true format=time caps=video/x-raw,format=BGR,width={width},height={height},framerate={fps}/1 ! 
     videoconvert ! video/x-raw,format=I420 ! 
     x264enc tune=zerolatency bitrate={bitrate} speed-preset=ultrafast key-int-max={key_int_max} aud=false !
-    video/x-h264,stream-format=byte-stream ! 
+    video/x-h264,stream-format=byte-stream,alignment=au ! 
     appsink name=sink sync=false emit-signals=true
 """.format(
     width=TARGET_SIZE[0],
