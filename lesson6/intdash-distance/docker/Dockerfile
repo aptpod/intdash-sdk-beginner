@@ -25,7 +25,7 @@ RUN apt-get update && apt-get install -y \
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y \
     nodejs
-RUN npm install @openapitools/openapi-generator-cli
+RUN npm install --save-exact　@openapitools/openapi-generator-cli@2.15.3
 RUN npx @openapitools/openapi-generator-cli version  
 
 # -------------------------------------------------------------------
@@ -121,4 +121,3 @@ RUN ls -l /intdash_sdk.zip
 # -------------------------------------------------------------------
 RUN rm -rf /var/lib/apt/lists/* \
     && apt-get clean
-

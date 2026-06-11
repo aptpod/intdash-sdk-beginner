@@ -47,7 +47,7 @@ npm -v
 
 ### OpenAPI Generatorインストール
 ```sh
-npm install @openapitools/openapi-generator-cli
+npm install @openapitools/openapi-generator-cli@2.15.3
 npx @openapitools/openapi-generator-cli version
 ```
 
