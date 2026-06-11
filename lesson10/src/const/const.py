@@ -59,7 +59,8 @@ ENCODE_PIPELINE = """
     appsrc name=src is-live=true format=time caps=video/x-raw,format=BGR,width={width},height={height},framerate={fps}/1 !
     videoconvert !
     jpegenc quality={quality} !
-    appsink name=sink sync=false emit-signals=true caps=image/jpeg
+    image/jpeg !
+    appsink name=sink sync=false emit-signals=true
 """.format(
     width=JPEG_SIZE[0],
     height=JPEG_SIZE[1],
