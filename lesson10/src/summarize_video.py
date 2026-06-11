@@ -210,7 +210,7 @@ if __name__ == "__main__":
     parser.add_argument("--dst_edge_uuid", required=False, help="Dest Edge UUID")
     parser.add_argument("--openai_key", required=True, help="OpenAI Access Key")
     parser.add_argument(
-        "--prompt_path", default=PROMPT_PATH, help="Sytem prompt file path"
+        "--prompt_path", default=PROMPT_PATH, help="System prompt file path"
     )
 
     args = parser.parse_args()
