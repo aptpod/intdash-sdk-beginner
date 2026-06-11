@@ -76,6 +76,6 @@ class Convertor:
                 buf = sample.get_buffer()
                 result, map_info = buf.map(Gst.MapFlags.READ)
                 if result:
-                    data = map_info.data
+                    data = bytes(map_info.data)
                     buf.unmap(map_info)
                     return data
