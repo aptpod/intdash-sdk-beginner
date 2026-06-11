@@ -6,7 +6,7 @@ import urllib.parse
 from typing import Optional
 
 import iscp
-from convertor.convertor import Converter
+from converter.converter import Converter
 from service.capture_service import CaptureService
 from snapper.snapper import Snapper
 from upstreamer.upstreamer import Upstreamer

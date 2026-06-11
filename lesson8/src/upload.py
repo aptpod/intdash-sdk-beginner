@@ -5,7 +5,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from convertor.convertor import Converter
+from converter.converter import Converter
 from service.upload_service import UploadService
 from writer.measurement_writer import MeasurementWriter
 

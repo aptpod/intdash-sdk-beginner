@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-from convertor.convertor import Converter
+from converter.converter import Converter
 from writer.measurement_writer import MeasurementWriter
 
 
@@ -14,17 +14,17 @@ class UploadService:
     MP4ファイル変換GStreamerパイプライン、計測作成、フレーム送信を管理する
 
     Attributes:
-        convertor (Converter): AVCC→AnnexBコンバーター
+        converter (Converter): AVCC→AnnexBコンバーター
         writer (MeasurementWriter): 計測作成
     """
 
     def __init__(
         self,
-        convertor: Converter,
+        converter: Converter,
         writer: MeasurementWriter,
         fetch_size: int = 100,
     ) -> None:
-        self.convertor = convertor
+        self.converter = converter
         self.writer = writer
         self.fetch_size = fetch_size
 
@@ -52,7 +52,7 @@ class UploadService:
             )
             logging.info(f"Created measurement: {measurement.uuid}")
 
-            self.convertor.start()
+            self.converter.start()
 
             fetch_task = asyncio.create_task(self.fetch(data_name))  # H.264フレーム取得
 
@@ -80,7 +80,7 @@ class UploadService:
         count = 0
         idr_count = 0
         while True:
-            frames = await self.convertor.fetch(self.fetch_size)
+            frames = await self.converter.fetch(self.fetch_size)
             if not frames:
                 break
 
@@ -110,5 +110,5 @@ class UploadService:
         """
         終了
         """
-        self.convertor.stop()
+        self.converter.stop()
         pass

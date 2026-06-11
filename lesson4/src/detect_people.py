@@ -5,7 +5,7 @@ import sys
 import urllib.parse
 
 import iscp
-from convertor.convertor import Converter
+from converter.converter import Converter
 from detector.detector import Detector
 from downstreamer.downstreamer import Downstreamer
 from service.detect_service import DetectService

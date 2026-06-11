@@ -21,7 +21,7 @@ from const.const import (
     UP_DATA_NAME_PREVIEW,
     UP_DATA_NAME_SUMMARY,
 )
-from convertor.convertor import Converter
+from converter.converter import Converter
 from downstreamer.downstreamer import Downstreamer
 from service.summarize_service import SummarizeService
 from tiler.tiler import Tiler

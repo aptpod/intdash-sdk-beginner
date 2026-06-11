@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from convertor.convertor import Converter
+from converter.converter import Converter
 from detector.detector import Detector
 from downstreamer.downstreamer import Downstreamer
 from upstreamer.upstreamer import Upstreamer

@@ -12,8 +12,8 @@ from const.const import (
     DATA_NAME_PCM,
     DATA_NAME_SPEED,
 )
-from convertor.audio.resampler import Resampler
-from convertor.subtitle.reverse_geocoder import ReverseGeocoder
+from converter.audio.resampler import Resampler
+from converter.subtitle.reverse_geocoder import ReverseGeocoder
 from mux.muxer import Muxer
 from reader.measurement_reader import MeasurementReader
 from service.download_service import DownloadConfig, DownloadService

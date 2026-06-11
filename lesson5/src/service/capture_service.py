@@ -3,7 +3,7 @@ import logging
 import time
 
 import iscp
-from convertor.convertor import Converter
+from converter.converter import Converter
 from snapper.snapper import Snapper
 from upstreamer.upstreamer import Upstreamer
 from writer.measurement_writer import MeasurementWriter

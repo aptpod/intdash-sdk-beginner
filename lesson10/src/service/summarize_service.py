@@ -6,7 +6,7 @@ from typing import Tuple
 import iscp
 from chatter.chatter import Chatter
 from const.const import DOWN_DATA_NAME_H264
-from convertor.convertor import Converter
+from converter.converter import Converter
 from downstreamer.downstreamer import Downstreamer
 from openai import RateLimitError
 from tiler.tiler import Tiler

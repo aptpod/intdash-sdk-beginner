@@ -12,10 +12,10 @@ from const.const import (
     DATA_NAME_PCM,
     DATA_NAME_SPEED,
 )
-from convertor.audio.codec import decode_pcm_s16le, encode_pcm_s16le
-from convertor.audio.resampler import Resampler
-from convertor.subtitle.aggregator import Aggregator, SrtSegment
-from convertor.subtitle.reverse_geocoder import ReverseGeocoder
+from converter.audio.codec import decode_pcm_s16le, encode_pcm_s16le
+from converter.audio.resampler import Resampler
+from converter.subtitle.aggregator import Aggregator, SrtSegment
+from converter.subtitle.reverse_geocoder import ReverseGeocoder
 from mux.muxer import Muxer, MuxInputs, MuxOptions
 from reader.measurement_reader import MeasurementReader
 from writer.bin_writer import BinWriter
