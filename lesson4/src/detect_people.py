@@ -5,7 +5,7 @@ import sys
 import urllib.parse
 
 import iscp
-from convertor.convertor import Convertor
+from convertor.convertor import Converter
 from detector.detector import Detector
 from downstreamer.downstreamer import Downstreamer
 from service.detect_service import DetectService
@@ -102,7 +102,7 @@ async def connect(
 
 def get_client(api_url: str, api_token: str) -> ApiClient:
     """
-    REST API設定
+    REST APIクライアント生成
 
     Args:
         api_url (str): APIのURL
@@ -161,7 +161,7 @@ async def main(
         client = get_client(api_url, api_token)
         service = DetectService(
             Downstreamer(conn, edge_uuid, DOWN_DATA_NAME),
-            Convertor(DECODE_PIPELINE),
+            Converter(DECODE_PIPELINE),
             Detector(
                 WEIGHTS_PATH,
                 CONFIG_PATH,
@@ -169,7 +169,7 @@ async def main(
                 TARGET_SIZE,
                 CONFIDENCE_THRESHOLD,
             ),
-            Convertor(ENCODE_PIPELINE),
+            Converter(ENCODE_PIPELINE),
             MeasurementWriter(client, project_uuid, dst_edge_uuid),
             Upstreamer(dst_conn, UP_DATA_NAME_VIDEO, UP_DATA_NAME_COUNT),
         )
@@ -192,7 +192,7 @@ if __name__ == "__main__":
         description="Process downstream H.264, detect people and upstream H.264 and count."
     )
     parser.add_argument("--api_url", required=True, help="URL of the intdash API")
-    parser.add_argument("--api_token", help="API Token")
+    parser.add_argument("--api_token", required=True, help="API Token")
     parser.add_argument(
         "--project_uuid",
         default="00000000-0000-0000-0000-000000000000",

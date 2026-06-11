@@ -3,7 +3,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-from convertor.convertor import Convertor
+from convertor.convertor import Converter
 from writer.measurement_writer import MeasurementWriter
 
 
@@ -14,13 +14,13 @@ class UploadService:
     MP4ファイル変換GStreamerパイプライン、計測作成、フレーム送信を管理する
 
     Attributes:
-        convertor (Convertor): AVCC→AnnexBコンバーター
+        convertor (Converter): AVCC→AnnexBコンバーター
         writer (MeasurementWriter): 計測作成
     """
 
     def __init__(
         self,
-        convertor: Convertor,
+        convertor: Converter,
         writer: MeasurementWriter,
         fetch_size: int = 100,
     ) -> None:

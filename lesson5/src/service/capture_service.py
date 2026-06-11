@@ -3,7 +3,7 @@ import logging
 import time
 
 import iscp
-from convertor.convertor import Convertor
+from convertor.convertor import Converter
 from snapper.snapper import Snapper
 from upstreamer.upstreamer import Upstreamer
 from writer.measurement_writer import MeasurementWriter
@@ -17,7 +17,7 @@ class CaptureService:
 
     Attributes:
         snapper (Snapper): 画面キャプチャ
-        encoder (Convertor): エンコーダー
+        encoder (Converter): エンコーダー
         writer (MeasurementWriter): 計測作成
         upstreamer (Upstreamer): アップストリーマー
         fps (int): FPS
@@ -26,7 +26,7 @@ class CaptureService:
     def __init__(
         self,
         snapper: Snapper,
-        encoder: Convertor,
+        encoder: Converter,
         writer: MeasurementWriter,
         upstreamer: Upstreamer,
         fps: int,

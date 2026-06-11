@@ -6,7 +6,7 @@ import urllib.parse
 from typing import Optional
 
 import iscp
-from convertor.convertor import Convertor
+from convertor.convertor import Converter
 from service.capture_service import CaptureService
 from snapper.snapper import Snapper
 from upstreamer.upstreamer import Upstreamer
@@ -79,7 +79,7 @@ async def connect(
 
 def get_client(api_url: str, api_token: str) -> ApiClient:
     """
-    REST API設定
+    REST APIクライアント生成
 
     Args:
         api_url (str): APIのURL
@@ -152,7 +152,7 @@ async def main(
         up_w, up_h = snapper.get_resized_size()
         service = CaptureService(
             snapper,
-            Convertor(
+            Converter(
                 ENCODE_PIPELINE.format(
                     width=up_w,
                     height=up_h,
@@ -183,7 +183,7 @@ if __name__ == "__main__":
         description="Process snap screen and upstream H.264."
     )
     parser.add_argument("--api_url", required=True, help="URL of the intdash API")
-    parser.add_argument("--api_token", help="API Token")
+    parser.add_argument("--api_token", required=True, help="API Token")
     parser.add_argument(
         "--project_uuid",
         default="00000000-0000-0000-0000-000000000000",
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("--edge_uuid", required=True, help="Edge UUID")
     parser.add_argument(
-        "--monitor", type=int, required=False, default=1, help="Monitors number"
+        "--monitor", type=int, required=False, default=1, help="Monitor number"
     )
     parser.add_argument(
         "--x", type=int, required=False, default=0, help="Capture offset x"

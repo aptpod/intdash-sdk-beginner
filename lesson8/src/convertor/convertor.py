@@ -8,7 +8,7 @@ from gi.repository import Gst  # noqa: E402
 Gst.init(None)
 
 
-class Convertor:
+class Converter:
     """
     メディアコンバーター
 

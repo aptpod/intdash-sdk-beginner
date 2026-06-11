@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-from convertor.convertor import Convertor
+from convertor.convertor import Converter
 from detector.detector import Detector
 from downstreamer.downstreamer import Downstreamer
 from upstreamer.upstreamer import Upstreamer
@@ -16,9 +16,9 @@ class DetectService:
 
     Attributes:
         downstreamer (Downstreamer): ダウンストリーマー
-        decoder (Convertor): デコーダー
+        decoder (Converter): デコーダー
         detector (Detector): 物体検出器
-        encoder (Convertor): エンコーダー
+        encoder (Converter): エンコーダー
         writer (MeasurementWriter): 計測作成
         upstreamer (Upstreamer): アップストリーマー
         elapsed_time_queue (Queue): 経過時間キュー
@@ -28,9 +28,9 @@ class DetectService:
     def __init__(
         self,
         downstreamer: Downstreamer,
-        decoder: Convertor,
+        decoder: Converter,
         detector: Detector,
-        encoder: Convertor,
+        encoder: Converter,
         writer: MeasurementWriter,
         upstreamer: Upstreamer,
     ) -> None:

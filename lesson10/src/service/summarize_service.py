@@ -6,7 +6,7 @@ from typing import Tuple
 import iscp
 from chatter.chatter import Chatter
 from const.const import DOWN_DATA_NAME_H264
-from convertor.convertor import Convertor
+from convertor.convertor import Converter
 from downstreamer.downstreamer import Downstreamer
 from openai import RateLimitError
 from tiler.tiler import Tiler
@@ -22,13 +22,13 @@ class SummarizeService:
 
     Attributes:
         downstreamer (Downstreamer): ダウンストリーマー
-        decoder (Convertor): デコーダー
+        decoder (Converter): デコーダー
         tiler (Tiler): グリッド画像生成
-        encoder_preview (Convertor): プレビュー画像エンコーダー
+        encoder_preview (Converter): プレビュー画像エンコーダー
         writer (MeasurementWriter): 計測作成
         upstreamer (Upstreamer): アップストリーマー
         chatter (Chatter): 生成AI問い合わせ
-        encoder_summary (Convertor): 要約対象画像エンコーダー
+        encoder_summary (Converter): 要約対象画像エンコーダー
         basetime (iscp.DateTime): 基準時刻
         metadata_queue (Queue): メタデータキュー(相対時刻)
         elapsed_time_queue (Queue): 基準時刻キュー
@@ -39,13 +39,13 @@ class SummarizeService:
     def __init__(
         self,
         downstreamer: Downstreamer,
-        decoder: Convertor,
+        decoder: Converter,
         tiler: Tiler,
-        encoder_preview: Convertor,
+        encoder_preview: Converter,
         writer: MeasurementWriter,
         upstreamer: Upstreamer,
         chatter: Chatter,
-        encoder_summary: Convertor,
+        encoder_summary: Converter,
         chat_maxsize: int = 2,
     ) -> None:
         self.downstreamer = downstreamer
