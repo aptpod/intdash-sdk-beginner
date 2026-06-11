@@ -12,10 +12,10 @@ class Convertor:
     """
     メディアコンバーター
 
-    Gstreamerパイプラインに従って、メディアデータをリアルタイム変換する
+    GStreamerパイプラインに従って、メディアデータをリアルタイム変換する
 
     Attributes:
-        pipeline (Gst.Pipeline): Gstreamerパイプライン
+        pipeline (Gst.Pipeline): GStreamerパイプライン
         sink (Gst.Element): 出力エレメント
     """
 
@@ -24,7 +24,7 @@ class Convertor:
         コンストラクタ
 
         Params:
-            pipeline (str): Gstreamerパイプライン名
+            pipeline (str): GStreamerパイプライン名
             src (str): 入力エレメント名
             sink (str): 出力エレメント名
         """
@@ -47,7 +47,7 @@ class Convertor:
         """
         フレーム取得
 
-        Gstreamerがバッファするため、非同期に読み出して返す。
+        GStreamerがバッファするため、非同期に読み出して返す。
 
         Args:
             size (int): フェッチサイズ

@@ -11,7 +11,7 @@ class UploadService:
     """
     動画アップロードサービス
 
-    MP4ファイル変換Gstreamerパイプライン、計測作成、フレーム送信を管理する
+    MP4ファイル変換GStreamerパイプライン、計測作成、フレーム送信を管理する
 
     Attributes:
         convertor (Convertor): AVCC→AnnexBコンバーター
@@ -38,7 +38,7 @@ class UploadService:
             basetime (datetime): 基準時刻
 
         計測作成
-        Gstreamerパイプライン開始
+        GStreamerパイプライン開始
         以下を実行
         - フレーム送信
             - AVCCからAnnexBに変換されたH.264データを取得

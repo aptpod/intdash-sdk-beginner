@@ -43,7 +43,7 @@ class CaptureService:
 
         計測作成
         アップストリーム開始
-        エンコーダーGstreamerパイプライン開始
+        エンコーダーGStreamerパイプライン開始
         以下を並列実行
         - 画面キャプチャ
             - RAWフレームをGStreamerエンコードパイプラインに渡す
