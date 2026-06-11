@@ -44,9 +44,9 @@ class Snapper:
 
         Params:
             monitors_number (int): モニタ番号（デフォルト：プライマリモニタ）
-            offset (tuple(int, int)): キャプチャ範囲オフセット（デフォルト：モニタ左上）
-            capture_size (tuple(int, int)): キャプチャ範囲サイズ（デフォルト：モニタサイズ）
-            resized_size (tuple(int, int)): キャプチャ範囲サイズ（デフォルト：モニタサイズ）
+            offset (Tuple[int, int]): キャプチャ範囲オフセット（デフォルト：モニタ左上）
+            capture_size (Tuple[int, int]): キャプチャ範囲サイズ（デフォルト：モニタサイズ）
+            resized_size (Tuple[int, int]): リサイズ後サイズ（デフォルト：キャプチャ範囲サイズ）
         """
         self.sct = mss.mss()
         monitor = self.sct.monitors[monitors_number]

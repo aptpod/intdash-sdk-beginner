@@ -98,7 +98,9 @@ class MeasurementWriter:
             - IDRフレーム: SPS(nal_type:7) PPS(nal_type:8) IDR(nal_type:5)が順序通りに存在
 
         Args:
-        Return:
+            encoded_data (bytes): H.264データ
+
+        Returns:
             bool:
                 True: IDRフレーム
                 False: Non-IDRフレーム、またはSPS/PPS/IDRの順序が満たされない
@@ -232,7 +234,7 @@ class MeasurementWriter:
 
         Args:
             sequence_uuid (str): シーケンスのUUID
-            dana_name (str): データ名
+            data_name (str): データ名
             frames (list): フレームリスト [(pts_ns, payload), ...]
 
         Returns:

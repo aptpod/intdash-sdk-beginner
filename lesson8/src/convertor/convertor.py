@@ -25,8 +25,7 @@ class Converter:
 
         Params:
             pipeline (str): GStreamerパイプライン名
-            src (str): 入力エレメント名
-            sink (str): 出力エレメント名
+            appsink (str): 出力エレメント名
         """
         self.pipeline = Gst.parse_launch(pipeline)
         self.sink = self.pipeline.get_by_name(appsink)

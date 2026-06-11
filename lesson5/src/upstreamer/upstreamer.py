@@ -28,7 +28,9 @@ class Upstreamer:
             - IDRフレーム: SPS(nal_type:7) PPS(nal_type:8) IDR(nal_type:5)が順序通りに存在
 
         Args:
-        Return:
+            encoded_data (bytes): H.264データ
+
+        Returns:
             bool:
                 True: IDRフレーム
                 False: Non-IDRフレーム、またはSPS/PPS/IDRの順序が満たされない
