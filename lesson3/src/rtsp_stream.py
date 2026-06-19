@@ -6,6 +6,7 @@ import sys
 import urllib.parse
 
 import iscp
+from const.const import FPS, PORT, RTSP_URL, STDERR_FLG, TIME_OFFSET
 from downstreamer.downstreamer import Downstreamer
 from logger.delay_logger import DelayLogger
 from service.rtsp_service import RtspService
@@ -16,11 +17,6 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)],
 )
-
-PORT = 443
-RTSP_URL = "rtsp://localhost:8554/stream"
-TIME_OFFSET = 9  # 日本
-STDERR_FLG = False
 
 
 async def connect(
@@ -72,6 +68,8 @@ async def main(api_url: str, api_token: str, project_uuid: str, edge_uuid: str) 
         f"Starting RTSP stream project_uuid: {project_uuid} edge_uuid: {edge_uuid}"
     )
 
+    conn: iscp.Conn | None = None
+    service: RtspService | None = None
     try:
         conn = await connect(
             api_url,
@@ -85,11 +83,13 @@ async def main(api_url: str, api_token: str, project_uuid: str, edge_uuid: str) 
                 edge_uuid,
             ),
             DelayLogger(TIME_OFFSET),
-            subprocess.Popen(
+            lambda: subprocess.Popen(
                 [
                     "ffmpeg",
                     "-f",
                     "h264",
+                    "-r",
+                    str(FPS),
                     "-i",
                     "-",
                     "-fflags",
@@ -98,6 +98,8 @@ async def main(api_url: str, api_token: str, project_uuid: str, edge_uuid: str) 
                     "ultrafast",
                     "-c:v",
                     "copy",  # 再エンコードなし
+                    "-rtsp_transport",
+                    "tcp",
                     "-f",
                     "rtsp",
                     RTSP_URL,
@@ -105,11 +107,13 @@ async def main(api_url: str, api_token: str, project_uuid: str, edge_uuid: str) 
                 stdin=subprocess.PIPE,
                 stderr=sys.stderr if STDERR_FLG else subprocess.DEVNULL,
             ),
-            subprocess.Popen(
+            lambda: subprocess.Popen(
                 [
                     "ffplay",
                     "-f",
                     "h264",
+                    "-framerate",
+                    str(FPS),
                     "-fflags",
                     "nobuffer",
                     "-flags",
@@ -126,8 +130,13 @@ async def main(api_url: str, api_token: str, project_uuid: str, edge_uuid: str) 
     except Exception as e:
         logging.error(f"Exception occurred: {e}")
     finally:
-        await service.close()
-        await conn.close()
+        if service is not None:
+            await service.close()
+        if conn is not None:
+            try:
+                await conn.close()
+            except iscp.ISCPTransportClosedError:
+                logging.info("Connection was already closed")
 
 
 if __name__ == "__main__":

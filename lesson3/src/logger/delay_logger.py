@@ -1,5 +1,4 @@
 import logging
-from typing import Optional
 
 import iscp
 
@@ -14,17 +13,16 @@ class DelayLogger:
 
     Attributes:
         time_offset (int): タイムゾーン時差
-        basetime (iscp.DateTime): 基準時刻（最優先）
-        priority (int): 優先度
+        basetimes (dict): セッションごとの基準時刻と優先度
     """
 
     def __init__(self, time_offset: int) -> None:
         self.time_offset = time_offset
-        self.basetime: Optional[iscp.DateTime] = None
-        self.priority: Optional[int] = None
+        self.basetimes: dict[str, tuple[iscp.DateTime, int]] = {}
 
     def set_basetime(
         self,
+        session_id: str,
         basetime: iscp.DateTime,
         priority: int,
     ) -> None:
@@ -34,24 +32,28 @@ class DelayLogger:
         最も優先度の高い基準時刻を保持
 
         Args:
-            basetime (iscp.DateTime): 基準時刻（最優先）
+            session_id (str): セッションID
+            basetime (iscp.DateTime): 基準時刻
             priority (int): 優先度
         """
-        if not self.basetime or not self.priority or priority >= self.priority:
-            self.basetime = basetime
-            self.priority = priority
+        current = self.basetimes.get(session_id)
+        if current is None or priority >= current[1]:
+            self.basetimes[session_id] = (basetime, priority)
 
-    def log(self, elapsed_time: int) -> None:
+    def log(self, session_id: str, elapsed_time: int) -> None:
         """
         ログ出力
 
         Args:
+            session_id (str): セッションID
             elapsed_time (int): 経過時間
         """
-        if not self.basetime:
+        current = self.basetimes.get(session_id)
+        if current is None:
             return
+        basetime, _ = current
         current_time = iscp.DateTime.utcnow()
-        absolute_time_unix_nano = self.basetime.unix_nano() + elapsed_time
+        absolute_time_unix_nano = basetime.unix_nano() + elapsed_time
         absolute_time = iscp.DateTime.from_unix_nano(absolute_time_unix_nano)
         delay = (current_time.unix_nano() - absolute_time.unix_nano()) / 1_000_000
         logging.info(
