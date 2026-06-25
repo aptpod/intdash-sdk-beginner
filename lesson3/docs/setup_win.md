@@ -50,6 +50,20 @@ python lesson3/src/rtsp_stream.py --api_url https://example.intdash.jp --api_tok
 - Data Name: `1/h264`
 
 ### ffplay
+#### 都度起動
 ```powershell
 ffplay -window_title "After RTSP" rtsp://localhost:8554/stream
+```
+
+#### 再開待ち
+```powershell
+while ($true) {
+  ffplay `
+    -autoexit `
+    -rtsp_transport tcp `
+    -timeout 3000000 `
+    -window_title "After RTSP" `
+    rtsp://localhost:8554/stream
+  Start-Sleep -Seconds 1
+}
 ```

@@ -1,7 +1,9 @@
 import asyncio
 import logging
 import subprocess
+from typing import Callable, Optional
 
+import iscp
 from downstreamer.downstreamer import Downstreamer
 from logger.delay_logger import DelayLogger
 
@@ -15,21 +17,25 @@ class RtspService:
     Attributes:
         downstreamer (Downstreamer): Downstreamer
         delay_logger (DelayLogger): 遅延ロガー
-        rtsp_process (subprocess.Popen): ffmpegプロセス
-        ffplay_process (subprocess.Popen): ffplayプロセス
+        rtsp_process_factory (Callable): ffmpegプロセス生成関数
+        ffplay_process_factory (Callable): ffplayプロセス生成関数
     """
 
     def __init__(
         self,
         downstreamer: Downstreamer,
         delay_logger: DelayLogger,
-        rtsp_process: subprocess.Popen,
-        ffplay_process: subprocess.Popen,
+        rtsp_process_factory: Callable[[], subprocess.Popen[bytes]],
+        ffplay_process_factory: Callable[[], subprocess.Popen[bytes]],
     ):
         self.downstreamer = downstreamer
         self.delay_logger = delay_logger
-        self.rtsp_process = rtsp_process
-        self.ffplay_process = ffplay_process
+        self.rtsp_process_factory = rtsp_process_factory
+        self.ffplay_process_factory = ffplay_process_factory
+        self.rtsp_process: Optional[subprocess.Popen[bytes]] = None
+        self.ffplay_process: Optional[subprocess.Popen[bytes]] = None
+        self.current_session_id: Optional[str] = None
+        self.waiting_for_idr = True
 
     async def start(self) -> None:
         """
@@ -60,9 +66,11 @@ class RtspService:
         - メタデータ取得
         - 基準時刻を元計測からコピー
         """
-        async for basetime, priority in self.downstreamer.read_basetime():
-            logging.info(f"Read basetime {basetime} priority {priority}")
-            self.delay_logger.set_basetime(basetime, priority)
+        async for session_id, basetime, priority in self.downstreamer.read_basetime():
+            logging.info(
+                f"Read basetime {basetime} priority {priority} session_id {session_id}"
+            )
+            self.delay_logger.set_basetime(session_id, basetime, priority)
 
     async def feed(self) -> None:
         """
@@ -73,21 +81,98 @@ class RtspService:
         - RTSPストリーム
         - ffplay入力
         """
-        if not self.rtsp_process.stdin or not self.ffplay_process.stdin:
-            raise
-        async for elapsed_time, frame in self.downstreamer.read():
-            self.delay_logger.log(elapsed_time)
-            self.rtsp_process.stdin.write(frame)
-            self.ffplay_process.stdin.write(frame)
+        async for session_id, is_idr, elapsed_time, frame in self.downstreamer.read():
+            self.delay_logger.log(session_id, elapsed_time)
+
+            if session_id != self.current_session_id:
+                logging.info(f"Switching media session to {session_id}")
+                await self.stop_media_processes()
+                self.current_session_id = session_id
+                self.waiting_for_idr = True
+
+            if self.media_processes_exited():
+                await self.stop_media_processes()
+                self.waiting_for_idr = True
+
+            if self.waiting_for_idr:
+                if not is_idr:
+                    continue
+                self.start_media_processes()
+                self.waiting_for_idr = False
+
+            try:
+                self.write_frame(frame)
+            except (BrokenPipeError, OSError) as error:
+                logging.warning(f"Media process disconnected: {error}")
+                await self.stop_media_processes()
+                self.waiting_for_idr = True
+
+    def start_media_processes(self) -> None:
+        """FFmpegとffplayを起動する。"""
+        logging.info("Starting media processes from an IDR frame")
+        self.rtsp_process = self.rtsp_process_factory()
+        self.ffplay_process = self.ffplay_process_factory()
+
+    def media_processes_exited(self) -> bool:
+        """起動済みプロセスの終了を検出する。"""
+        return any(
+            process is not None and process.poll() is not None
+            for process in (self.rtsp_process, self.ffplay_process)
+        )
+
+    def write_frame(self, frame: bytes) -> None:
+        """両方のメディアプロセスへフレームを書き込む。"""
+        if (
+            self.rtsp_process is None
+            or self.rtsp_process.stdin is None
+            or self.ffplay_process is None
+            or self.ffplay_process.stdin is None
+        ):
+            raise BrokenPipeError("media process stdin is unavailable")
+        self.rtsp_process.stdin.write(frame)
+        self.ffplay_process.stdin.write(frame)
+
+    async def stop_media_processes(self) -> None:
+        """イベントループを止めずにメディアプロセスを停止する。"""
+        processes = [
+            process
+            for process in (self.rtsp_process, self.ffplay_process)
+            if process is not None
+        ]
+        self.rtsp_process = None
+        self.ffplay_process = None
+        await asyncio.gather(
+            *(
+                asyncio.to_thread(self.stop_media_process, process)
+                for process in processes
+            )
+        )
+
+    @staticmethod
+    def stop_media_process(process: subprocess.Popen[bytes]) -> None:
+        """別スレッドで単一のメディアプロセスを停止する。"""
+        if process.stdin:
+            try:
+                process.stdin.close()
+            except BrokenPipeError:
+                pass
+        try:
+            process.wait(timeout=0.5)
+        except subprocess.TimeoutExpired:
+            process.terminate()
+            try:
+                process.wait(timeout=1)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
 
     async def close(self) -> None:
         """
         終了
         """
-        await self.downstreamer.close()
-        if self.rtsp_process.stdin:
-            self.rtsp_process.stdin.close()
-        self.rtsp_process.wait()
-        if self.ffplay_process.stdin:
-            self.ffplay_process.stdin.close()
-        self.ffplay_process.wait()
+        try:
+            await self.downstreamer.close()
+        except iscp.ISCPTransportClosedError:
+            logging.info("Downstream was already closed")
+        finally:
+            await self.stop_media_processes()

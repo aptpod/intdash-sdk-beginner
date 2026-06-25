@@ -39,7 +39,7 @@ Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 
 ### OpenAPI Generatorインストール
 ```powershell
-npm install @openapitools/openapi-generator-cli
+npm install @openapitools/openapi-generator-cli@2.15.3
 npx @openapitools/openapi-generator-cli version
 ```
 

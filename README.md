@@ -32,7 +32,6 @@ git clone https://github.com/k-ise/intdash-sdk-beginner.git
 - Python 3.14.5
 
 ### WSL2
-Gstreamer利用時
+GStreamer利用時
 - Ubuntu 26.04 LTS
 - Python 3.14.4
-

@@ -5,7 +5,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from convertor.convertor import Convertor
+from converter.converter import Converter
 from service.upload_service import UploadService
 from writer.measurement_writer import MeasurementWriter
 
@@ -34,7 +34,7 @@ PIPELINE = """
 
 def get_client(api_url: str, api_token: str) -> ApiClient:
     """
-    REST API設定
+    REST APIクライアント生成
 
     Args:
         api_url (str): APIのURL
@@ -77,7 +77,7 @@ async def main(
     try:
         client = get_client(api_url, api_token)
         service = UploadService(
-            Convertor(PIPELINE.format(path=filepath)),
+            Converter(PIPELINE.format(path=filepath)),
             MeasurementWriter(client, project_uuid, edge_uuid),
             FETCH_SIZE,
         )
@@ -98,7 +98,7 @@ async def main(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Process read MP4 frame, put it and count."
+        description="Read MP4 and upload H.264 frames."
     )
     parser.add_argument("--api_url", required=True, help="URL of the intdash API")
     parser.add_argument("--api_token", required=True, help="API Token")

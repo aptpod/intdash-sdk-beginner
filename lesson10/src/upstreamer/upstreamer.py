@@ -44,7 +44,7 @@ class Upstreamer:
         基準時刻送信
 
         Args:
-            basetime (BaseTime): 基準時刻
+            basetime_src (BaseTime): 基準時刻
         """
         basetime = copy.copy(basetime_src)
         basetime.session_id = self.up.session_id

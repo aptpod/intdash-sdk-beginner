@@ -16,7 +16,7 @@ import cv2
 
 PORT = 443
 READ_TIMEOUT = 5 * 60.0  # 秒
-PING_INTERVAL = 10 * 60.0  # 秒
+PING_INTERVAL = 10.0  # 秒
 PING_TIMEOUT = 10.0  # 秒
 
 # 受信データ名
@@ -59,7 +59,8 @@ ENCODE_PIPELINE = """
     appsrc name=src is-live=true format=time caps=video/x-raw,format=BGR,width={width},height={height},framerate={fps}/1 !
     videoconvert !
     jpegenc quality={quality} !
-    appsink name=sink sync=false emit-signals=true caps=image/jpeg
+    image/jpeg !
+    appsink name=sink sync=false emit-signals=true
 """.format(
     width=JPEG_SIZE[0],
     height=JPEG_SIZE[1],

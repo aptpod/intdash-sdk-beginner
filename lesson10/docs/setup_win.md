@@ -19,16 +19,16 @@ export PYTHONPATH=/path/to/your_workspace
 ### サンプルプログラム
 #### 同一エッジ指定
 ```sh
-python lesson10/src/detect_people.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --openai_key <OPENAI_KEY> --dst_edge_uuid <YOUR_DST_EDGE_UUID>
+python lesson10/src/summarize_video.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --openai_key <OPENAI_KEY> --dst_edge_uuid <YOUR_DST_EDGE_UUID>
 ```
 
 #### 別エッジ指定
 ```sh
-python lesson10/src/detect_people.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --openai_key <OPENAI_KEY> --dst_edge_uuid <YOUR_DST_EDGE_UUID>
+python lesson10/src/summarize_video.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --openai_key <OPENAI_KEY> --dst_edge_uuid <YOUR_DST_EDGE_UUID>
 ```
 #### プロンプトファイル指定
 ```sh
-python lesson10/src/detect_people.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --openai_key <OPENAI_KEY> --prompt_path <YOUR_PROMPT_PATH>
+python lesson10/src/summarize_video.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --openai_key <OPENAI_KEY> --prompt_path <YOUR_PROMPT_PATH>
 ```
 
 ### 収集開始

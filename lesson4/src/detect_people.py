@@ -5,7 +5,7 @@ import sys
 import urllib.parse
 
 import iscp
-from convertor.convertor import Convertor
+from converter.converter import Converter
 from detector.detector import Detector
 from downstreamer.downstreamer import Downstreamer
 from service.detect_service import DetectService
@@ -24,7 +24,7 @@ logging.basicConfig(
 
 PORT = 443
 READ_TIMEOUT = 5 * 60.0  # 秒
-PING_INTERVAL = 10 * 60.0  # 秒
+PING_INTERVAL = 10.0  # 秒
 PING_TIMEOUT = 10.0  # 秒
 
 DOWN_DATA_NAME = "1/h264"
@@ -32,7 +32,7 @@ UP_DATA_NAME_VIDEO = "10/h264"
 UP_DATA_NAME_COUNT = "11/detect_count"
 
 TARGET_SIZE = 640, 480
-CONFIDENCE_THRESHOULD = 0.2
+CONFIDENCE_THRESHOLD = 0.2
 
 FPS = 15
 BITRATE = 3000  # kbps
@@ -42,7 +42,7 @@ CONFIG_PATH = "./lesson4/config/yolov4-tiny.cfg"
 NAMES_PATH = "./lesson4/config/coco.names"
 
 
-# GStreame H.264デコードパイプライン
+# GStreamer H.264デコードパイプライン
 DECODE_PIPELINE = """
     appsrc name=src is-live=true format=time caps=video/x-h264,stream-format=byte-stream ! 
     h264parse config-interval=-1 ! avdec_h264 ! videoconvert ! video/x-raw,format=BGR !
@@ -54,7 +54,7 @@ ENCODE_PIPELINE = """
     appsrc name=src is-live=true format=time caps=video/x-raw,format=BGR,width={width},height={height},framerate={fps}/1 ! 
     videoconvert ! video/x-raw,format=I420 ! 
     x264enc tune=zerolatency bitrate={bitrate} speed-preset=ultrafast key-int-max={key_int_max} aud=false !
-    video/x-h264,stream-format=byte-stream ! 
+    video/x-h264,stream-format=byte-stream,alignment=au ! 
     appsink name=sink sync=false emit-signals=true
 """.format(
     width=TARGET_SIZE[0],
@@ -102,7 +102,7 @@ async def connect(
 
 def get_client(api_url: str, api_token: str) -> ApiClient:
     """
-    REST API設定
+    REST APIクライアント生成
 
     Args:
         api_url (str): APIのURL
@@ -161,15 +161,15 @@ async def main(
         client = get_client(api_url, api_token)
         service = DetectService(
             Downstreamer(conn, edge_uuid, DOWN_DATA_NAME),
-            Convertor(DECODE_PIPELINE),
+            Converter(DECODE_PIPELINE),
             Detector(
                 WEIGHTS_PATH,
                 CONFIG_PATH,
                 NAMES_PATH,
                 TARGET_SIZE,
-                CONFIDENCE_THRESHOULD,
+                CONFIDENCE_THRESHOLD,
             ),
-            Convertor(ENCODE_PIPELINE),
+            Converter(ENCODE_PIPELINE),
             MeasurementWriter(client, project_uuid, dst_edge_uuid),
             Upstreamer(dst_conn, UP_DATA_NAME_VIDEO, UP_DATA_NAME_COUNT),
         )
@@ -192,7 +192,7 @@ if __name__ == "__main__":
         description="Process downstream H.264, detect people and upstream H.264 and count."
     )
     parser.add_argument("--api_url", required=True, help="URL of the intdash API")
-    parser.add_argument("--api_token", help="API Token")
+    parser.add_argument("--api_token", required=True, help="API Token")
     parser.add_argument(
         "--project_uuid",
         default="00000000-0000-0000-0000-000000000000",

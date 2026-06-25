@@ -21,7 +21,7 @@ from const.const import (
     UP_DATA_NAME_PREVIEW,
     UP_DATA_NAME_SUMMARY,
 )
-from convertor.convertor import Convertor
+from converter.converter import Converter
 from downstreamer.downstreamer import Downstreamer
 from service.summarize_service import SummarizeService
 from tiler.tiler import Tiler
@@ -75,7 +75,7 @@ async def connect(
 
 def get_client(api_url: str, api_token: str) -> ApiClient:
     """
-    REST API設定
+    REST APIクライアント生成
 
     Args:
         api_url (str): APIのURL
@@ -168,9 +168,9 @@ async def main(
                 edge_uuid,
                 [DOWN_DATA_NAME_H264],
             ),
-            Convertor(DECODE_PIPELINE),
+            Converter(DECODE_PIPELINE),
             Tiler(H264_SIZE[0], H264_SIZE[1], JPEG_SIZE[0], JPEG_SIZE[1]),
-            Convertor(ENCODE_PIPELINE),  # プレビュー画像
+            Converter(ENCODE_PIPELINE),  # プレビュー画像
             MeasurementWriter(client, project_uuid, dst_edge_uuid),
             Upstreamer(
                 dst_conn,
@@ -179,7 +179,7 @@ async def main(
                 UP_DATA_NAME_ANSWER,
             ),
             Chatter(openai_key, system_prompt),
-            Convertor(ENCODE_PIPELINE),  # 要約対象画像
+            Converter(ENCODE_PIPELINE),  # 要約対象画像
         )
         await service.start(READ_TIMEOUT)
 
@@ -210,7 +210,7 @@ if __name__ == "__main__":
     parser.add_argument("--dst_edge_uuid", required=False, help="Dest Edge UUID")
     parser.add_argument("--openai_key", required=True, help="OpenAI Access Key")
     parser.add_argument(
-        "--prompt_path", default=PROMPT_PATH, help="Sytem prompt file path"
+        "--prompt_path", default=PROMPT_PATH, help="System prompt file path"
     )
 
     args = parser.parse_args()

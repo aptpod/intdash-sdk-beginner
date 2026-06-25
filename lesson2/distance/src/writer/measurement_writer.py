@@ -110,8 +110,6 @@ class MeasurementWriter:
         チャンク送信
 
         Args:
-            project_uuid: プロジェクトのUUID
-            measurement: 計測情報
             sequence_uuid: シーケンスのUUID
             distances: 距離リスト
 

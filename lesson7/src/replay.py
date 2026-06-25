@@ -22,7 +22,7 @@ logging.basicConfig(
 
 PORT = 443
 READ_TIMEOUT = 0.5 * 60.0  # 秒
-PING_INTERVAL = 10 * 60.0  # 秒
+PING_INTERVAL = 10.0  # 秒
 PING_TIMEOUT = 10.0  # 秒
 
 
@@ -62,7 +62,7 @@ async def connect(
 
 def get_client(api_url: str, api_token: str) -> ApiClient:
     """
-    REST API設定
+    REST APIクライアント生成
 
     Args:
         api_url: APIのURL
@@ -159,12 +159,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Replay Stored Data as new Measurement Data"
     )
-    parser.add_argument("--api_url", required=True, help="URL of intdash API")
+    parser.add_argument("--api_url", required=True, help="URL of the intdash API")
     parser.add_argument("--api_token", required=True, help="API Token")
     parser.add_argument(
         "--project_uuid",
         default="00000000-0000-0000-0000-000000000000",
-        help="Project UUID",
+        help="Project UUID (default: 00000000-0000-0000-0000-000000000000)",
     )
     parser.add_argument("--meas_uuid", required=False, help="Source Measurement UUID")
     parser.add_argument("--edge_uuid", required=False, help="Source Edge UUID")
@@ -175,14 +175,16 @@ if __name__ == "__main__":
         "--end", required=False, help="End time yyyy-mm-ddThh:MM:ss.SSSSSS+HH:MM"
     )
     parser.add_argument(
-        "--data_id_filter", required=False, help="Data ID filter comma separeted"
+        "--data_id_filter", required=False, help="Data ID filter comma separated"
     )
-    parser.add_argument("--dst_api_url", required=False, help="URL of Dest intdash API")
+    parser.add_argument(
+        "--dst_api_url", required=False, help="URL of the destination intdash API"
+    )
     parser.add_argument("--dst_api_token", required=False, help="Dest API Token")
     parser.add_argument(
         "--dst_project_uuid",
         default="00000000-0000-0000-0000-000000000000",
-        help="Project UUID",
+        help="Destination project UUID (default: 00000000-0000-0000-0000-000000000000)",
     )
     parser.add_argument("--dst_edge_uuid", required=False, help="Dest Edge UUID")
     parser.add_argument("--speed", type=float, default=1, help="Replay speed")
