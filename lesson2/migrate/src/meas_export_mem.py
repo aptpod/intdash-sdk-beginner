@@ -26,6 +26,23 @@ logging.basicConfig(
 DATA_PATH = "."
 
 
+def iter_api_items(response: Any) -> list:
+    """
+    SDKのバージョン差分吸収
+
+    一覧レスポンスが response.items の場合と response["items"] の場合を吸収する。
+
+    Args:
+        response: APIの一覧レスポンス
+
+    Returns:
+        list: 一覧レスポンスのitems
+    """
+    if hasattr(response, "items") and not isinstance(response, dict):
+        return response.items
+    return response["items"]
+
+
 class MeasurementEncoder(json.JSONEncoder):
     """
     計測エンコーダー
@@ -124,9 +141,10 @@ def get_basetimes(client: ApiClient, project_uuid: str, meas_uuid: str) -> list:
     basetimes = api.list_project_measurement_base_times(
         project_uuid=project_uuid, measurement_uuid=meas_uuid
     )
-    count = len(basetimes["items"])
+    items = iter_api_items(basetimes)
+    count = len(items)
     logging.info(f"Download basetimes: {count}")
-    return basetimes["items"]
+    return items
 
 
 def get_datapoints(
@@ -148,20 +166,40 @@ def get_datapoints(
         dict: データポイント
     """
     api = measurement_service_data_points_api.MeasurementServiceDataPointsApi(client)
-    params = {
-        "project_uuid": project_uuid,
-        "name": meas_uuid,
-        "time_format": "ns",
-        "_preload_content": False,
-    }
-    stream = api.list_project_data_points(**params)
-    if stream is None:
-        raise Exception("Error: stream is None")
+    try:
+        response = api.list_project_data_points(
+            project_uuid=project_uuid,
+            name=meas_uuid,
+            time_format="ns",
+            _headers={"Accept": "application/json"},
+        )
+    except (TypeError, ValueError):
+        response = api.list_project_data_points(
+            project_uuid=project_uuid,
+            name=meas_uuid,
+            time_format="ns",
+            _headers={"Accept": "application/json"},
+            _preload_content=False,
+        )
+
+    if response is None:
+        raise Exception("Error: response is None")
+
+    # 2025R1以降のSDKではbytearray、以前のSDKではstreamが返るため両対応する。
+    if isinstance(response, (bytes, bytearray)):
+        for line in bytes(response).splitlines():
+            line_json = json.loads(line.decode())
+            if "data" not in line_json:
+                continue
+            if "d" not in line_json["data"]:
+                continue
+            yield line_json
+        return
 
     # バッファ格納
     buffer = b""
     while True:
-        chunk = stream.read(chunk_size)
+        chunk = response.read(chunk_size)
         if not chunk:
             break
         buffer += chunk
