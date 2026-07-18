@@ -85,6 +85,20 @@ python lesson2/migrate/src/meas_import.py --api_url https://example.intdash.jp -
 python lesson2/migrate/src/meas_import_mem.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --src_file <EXPORTED_JSON_FILE>
 ```
 
+1リクエストあたりのデータポイント数を指定する場合:
+
+```sh
+python lesson2/migrate/src/meas_import_mem.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --src_file <EXPORTED_JSON_FILE> --max_points_per_request 10000
+```
+
+protobuf bodyサイズの上限も指定する場合:
+
+```sh
+python lesson2/migrate/src/meas_import_mem.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --edge_uuid <YOUR_EDGE_UUID> --src_file <EXPORTED_JSON_FILE> --max_points_per_request 10000 --max_request_bytes 900000
+```
+
+`--max_request_bytes 0` の場合、bodyサイズ上限による分割は行わず、`--max_points_per_request` の点数上限で分割します。
+
 ### GPS距離算出
 ```sh
 python lesson2/distance/src/distance.py --api_url https://example.intdash.jp --api_token <YOUR_API_TOKEN> --project_uuid <YOUR_PROJECT_UUID> --meas_uuid <YOUR_MEAS_UUID>
