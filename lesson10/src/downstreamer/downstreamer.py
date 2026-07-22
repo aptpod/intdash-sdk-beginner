@@ -29,7 +29,6 @@ class Downstreamer:
         self.conn = conn
         self.edge_uuid = edge_uuid
         self.data_name = data_name
-        self.last_elapsed_time = None
         self.upstream_closed = asyncio.Event()
 
     async def open(self) -> None:
@@ -128,29 +127,7 @@ class Downstreamer:
                     )
 
             sorted_points = sorted(points, key=lambda point: point[0])
-            elapsed_times = [elapsed_time for elapsed_time, _, _ in points]
-            sorted_elapsed_times = [
-                elapsed_time for elapsed_time, _, _ in sorted_points
-            ]
-            if elapsed_times != sorted_elapsed_times:
-                logging.info(
-                    "Sorted downstream chunk by elapsed_time: before=%s after=%s",
-                    elapsed_times,
-                    sorted_elapsed_times,
-                )
-
             for elapsed_time, name, payload in sorted_points:
-                if (
-                    self.last_elapsed_time is not None
-                    and elapsed_time < self.last_elapsed_time
-                ):
-                    logging.info(
-                        "Downstream elapsed_time is non-monotonic across chunks: previous=%d current=%d delta=%d",
-                        self.last_elapsed_time,
-                        elapsed_time,
-                        elapsed_time - self.last_elapsed_time,
-                    )
-                self.last_elapsed_time = elapsed_time
                 yield elapsed_time, name, payload
 
     async def close(self) -> None:
