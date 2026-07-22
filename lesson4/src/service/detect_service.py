@@ -46,13 +46,8 @@ class DetectService:
         self.encoder = encoder
         self.writer = writer
         self.upstreamer = upstreamer
-        self.elapsed_time_queue: asyncio.Queue[tuple[int, int]] = asyncio.Queue()
-        self.count_queue: asyncio.Queue[tuple[int, int, int]] = asyncio.Queue()
-        self.read_seq = 0
-        self.decoded_seq = 0
-        self.detected_seq = 0
-        self.encoded_seq = 0
-        self.sent_seq = 0
+        self.elapsed_time_queue: asyncio.Queue[int] = asyncio.Queue()
+        self.count_queue: asyncio.Queue[tuple[int, int]] = asyncio.Queue()
         self.encoded_pts_offset: Optional[int] = None
 
     async def start(self, read_timeout: float = 60) -> None:
@@ -142,29 +137,13 @@ class DetectService:
         """
         try:
             async for elapsed_time, frame in self.downstreamer.read(read_timeout):
-                self.read_seq += 1
-                logging.info(
-                    "Trace read seq=%d elapsed_time=%d h264_bytes=%d elapsed_q=%d count_q=%d",
-                    self.read_seq,
-                    elapsed_time,
-                    len(frame),
-                    self.elapsed_time_queue.qsize(),
-                    self.count_queue.qsize(),
-                )
-
-                await self.elapsed_time_queue.put((self.read_seq, elapsed_time))
+                await self.elapsed_time_queue.put(elapsed_time)
 
                 # intdashのelapsed_timeをPTSに載せ、以降はフレーム自身に時刻を持たせる。
                 await self.decoder.push(frame, pts=elapsed_time)
         except TimeoutError:
             logging.info("Downstream read timeout. Start decoder drain.")
         finally:
-            logging.info(
-                "Trace feed_eos read_seq=%d elapsed_q=%d count_q=%d",
-                self.read_seq,
-                self.elapsed_time_queue.qsize(),
-                self.count_queue.qsize(),
-            )
             self.decoder.end_of_stream()
 
     async def detect(self) -> None:
@@ -178,47 +157,18 @@ class DetectService:
         """
         try:
             while True:
-                frame, pts, dts, duration = await self.decoder.get_with_timing()
-                self.decoded_seq += 1
-                logging.info(
-                    "Trace decoded seq=%d raw_bytes=%d pts=%d dts=%d duration=%d elapsed_q=%d count_q=%d",
-                    self.decoded_seq,
-                    len(frame),
-                    pts,
-                    dts,
-                    duration,
-                    self.elapsed_time_queue.qsize(),
-                    self.count_queue.qsize(),
-                )
+                frame, pts, _, _ = await self.decoder.get_with_timing()
 
                 detected, count = self.detector.detect(frame)
-                self.detected_seq += 1
-                logging.info(
-                    "Trace detected seq=%d decoded_seq=%d raw_bytes=%d count=%d pts=%d elapsed_q=%d count_q=%d",
-                    self.detected_seq,
-                    self.decoded_seq,
-                    len(detected),
-                    count,
-                    pts,
-                    self.elapsed_time_queue.qsize(),
-                    self.count_queue.qsize(),
-                )
 
                 # 検出人数はGStreamerには載せず、同じ検出フレームのPTSと一緒にキューで同期する。
-                await self.count_queue.put((self.detected_seq, count, pts))
+                await self.count_queue.put((count, pts))
 
                 encoder_pts = pts if pts != GST_CLOCK_TIME_NONE else None
                 await self.encoder.push(detected, pts=encoder_pts)
         except EOFError:
-            logging.info("Decoder drained. Start encoder drain.")
+            pass
         finally:
-            logging.info(
-                "Trace detect_eos decoded_seq=%d detected_seq=%d elapsed_q=%d count_q=%d",
-                self.decoded_seq,
-                self.detected_seq,
-                self.elapsed_time_queue.qsize(),
-                self.count_queue.qsize(),
-            )
             self.encoder.end_of_stream()
 
     async def fetch(self) -> None:
@@ -233,80 +183,22 @@ class DetectService:
 
         try:
             while True:
-                frame, pts, dts, duration = await self.encoder.get_with_timing()
-                self.encoded_seq += 1
-                logging.info(
-                    "Trace encoded seq=%d h264_bytes=%d pts=%d dts=%d duration=%d elapsed_q=%d count_q=%d",
-                    self.encoded_seq,
-                    len(frame),
-                    pts,
-                    dts,
-                    duration,
-                    self.elapsed_time_queue.qsize(),
-                    self.count_queue.qsize(),
-                )
+                frame, pts, _, _ = await self.encoder.get_with_timing()
 
-                input_seq, queued_elapsed_time = await self.elapsed_time_queue.get()
-                detected_seq, count, detected_pts = await self.count_queue.get()
-                elapsed_time_source = "queue"
+                queued_elapsed_time = await self.elapsed_time_queue.get()
+                count, detected_pts = await self.count_queue.get()
                 elapsed_time = queued_elapsed_time
-                normalized_encoded_pts = GST_CLOCK_TIME_NONE
                 if pts != GST_CLOCK_TIME_NONE and detected_pts != GST_CLOCK_TIME_NONE:
                     if self.encoded_pts_offset is None:
                         # x264encなどがPTSに固定offsetを加えることがあるため、初回PTS差分で正規化する。
                         self.encoded_pts_offset = pts - detected_pts
-                        logging.info(
-                            "Trace encoded_pts_offset offset=%d first_encoded_pts=%d first_detected_pts=%d",
-                            self.encoded_pts_offset,
-                            pts,
-                            detected_pts,
-                        )
-                    normalized_encoded_pts = pts - self.encoded_pts_offset
-                    elapsed_time_source = "normalized_encoded_pts"
-                    elapsed_time = normalized_encoded_pts
+                    elapsed_time = pts - self.encoded_pts_offset
                 elif detected_pts != GST_CLOCK_TIME_NONE:
-                    elapsed_time_source = "detected_pts"
                     elapsed_time = detected_pts
-                self.sent_seq += 1
-
-                if elapsed_time != queued_elapsed_time:
-                    logging.info(
-                        "Trace elapsed_mismatch sent_seq=%d input_seq=%d queued_elapsed_time=%d selected_elapsed_time=%d source=%s",
-                        self.sent_seq,
-                        input_seq,
-                        queued_elapsed_time,
-                        elapsed_time,
-                        elapsed_time_source,
-                    )
 
                 await self.upstreamer.send(elapsed_time, frame, count)
-                logging.info(
-                    "Trace sent seq=%d input_seq=%d detected_seq=%d encoded_seq=%d elapsed_time=%d queued_elapsed_time=%d detected_pts=%d encoded_pts=%d normalized_encoded_pts=%d elapsed_time_source=%s h264_bytes=%d count=%d elapsed_q=%d count_q=%d",
-                    self.sent_seq,
-                    input_seq,
-                    detected_seq,
-                    self.encoded_seq,
-                    elapsed_time,
-                    queued_elapsed_time,
-                    detected_pts,
-                    pts,
-                    normalized_encoded_pts,
-                    elapsed_time_source,
-                    len(frame),
-                    count,
-                    self.elapsed_time_queue.qsize(),
-                    self.count_queue.qsize(),
-                )
         except EOFError:
-            logging.info("Encoder drained.")
-        finally:
-            logging.info(
-                "Trace fetch_eos encoded_seq=%d sent_seq=%d elapsed_q=%d count_q=%d",
-                self.encoded_seq,
-                self.sent_seq,
-                self.elapsed_time_queue.qsize(),
-                self.count_queue.qsize(),
-            )
+            pass
 
     async def close(self) -> None:
         """
