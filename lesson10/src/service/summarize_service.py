@@ -1,7 +1,7 @@
 import asyncio
 import json
 import logging
-from typing import Tuple
+from typing import Optional, Tuple
 
 import iscp
 from chatter.chatter import Chatter
@@ -13,12 +13,17 @@ from tiler.tiler import Tiler
 from upstreamer.upstreamer import Upstreamer
 from writer.measurement_writer import MeasurementWriter
 
+GST_CLOCK_TIME_NONE = (1 << 64) - 1
+
 
 class SummarizeService:
     """
     映像フレーム要約サービス
 
     H.264ダウンストリーム、グリッド画像化・生成AIによる要約結果アップストリームを管理する
+    H.264データポイントの経過時間はGStreamer BufferのPTSとしてパイプラインへ渡す。
+    プレビュー画像、要約対象画像、要約結果は、エンコード後フレームのPTSを正規化した
+    elapsed_timeでアップストリームする。
 
     Attributes:
         downstreamer (Downstreamer): ダウンストリーマー
@@ -30,9 +35,9 @@ class SummarizeService:
         chatter (Chatter): 生成AI問い合わせ
         encoder_summary (Converter): 要約対象画像エンコーダー
         basetime (iscp.DateTime): 基準時刻
-        metadata_queue (Queue): メタデータキュー(相対時刻)
-        elapsed_time_queue (Queue): 基準時刻キュー
-        prompt_queue (Queue): プロンプトキュー(相対時刻)
+        metadata_queue (Queue): デコードPTS照合用キュー
+        elapsed_time_queue (Queue): プレビュー画像PTS照合用キュー
+        prompt_queue (Queue): プロンプトキュー(要約対象画像PTS照合用)
         answer_queue (Queue): 要約結果キュー(相対時刻, 回答, 要約対象画像)
     """
 
@@ -58,10 +63,20 @@ class SummarizeService:
         self.encoder_summary = encoder_summary
 
         self.basetime: iscp.DateTime = iscp.DateTime.utcnow()
-        self.metadata_queue: asyncio.Queue[int] = asyncio.Queue()
-        self.elapsed_time_queue: asyncio.Queue[int] = asyncio.Queue()
-        self.prompt_queue: asyncio.Queue[int] = asyncio.Queue(maxsize=chat_maxsize)
-        self.answer_queue: asyncio.Queue[Tuple[int, str, bytes]] = asyncio.Queue()
+        self.metadata_queue: asyncio.Queue[Tuple[int, int]] = asyncio.Queue()
+        self.elapsed_time_queue: asyncio.Queue[Tuple[int, int]] = asyncio.Queue()
+        self.prompt_queue: asyncio.Queue[Optional[int]] = asyncio.Queue(
+            maxsize=chat_maxsize
+        )
+        self.answer_queue: asyncio.Queue[
+            Tuple[Optional[int], Optional[str], Optional[bytes]]
+        ] = asyncio.Queue()
+        self.read_seq = 0
+        self.decoded_seq = 0
+        self.preview_seq = 0
+        self.summary_seq = 0
+        self.preview_pts_offset: Optional[int] = None
+        self.summary_pts_offset: Optional[int] = None
 
     async def start(self, read_timeout: float = 60) -> None:
         """
@@ -76,20 +91,26 @@ class SummarizeService:
         以下を並列実行
         - 基準時刻供給
         - H.264データ供給
-            - ダウンストリームしたH.264データをGStreamerデコードパイプラインに渡す
+            - ダウンストリームした経過時間をPTSとして設定
+            - H.264データをGStreamerデコードパイプラインに渡す
         - グリッド配置
-            - デコードされたRAWフレームをOpenCVでグリッド配置
-            - グリッド更新：プレビュー用GStreamerエンコードパイプラインに渡す
-            - グリッド完成：要約対象GStreamerエンコードパイプラインに渡す
+            - PTS付きRAWフレームをOpenCVでグリッド配置
+            - グリッド更新：PTS付きでプレビュー用GStreamerエンコードパイプラインに渡す
+            - グリッド完成：PTS付きで要約対象GStreamerエンコードパイプラインに渡す
         - プレビュー画像取得
-            - エンコードされたプレビュー画像JPEGデータをアップストリーム
+            - エンコードされたプレビュー画像JPEGデータとPTSを取得
+            - PTSを正規化して経過時間としてアップストリーム
         - データ要約
+            - エンコードされた要約対象画像JPEGデータとPTSを取得
             - OpenAIで画像要約
         - 要約結果データ取得
             - 要約結果をアップストリーム
             - エンコードされた要約対象画像JPEGデータをアップストリーム
-        データチャンク受信のタイムアウト時に計測完了
+        元ストリーム終了またはデータチャンク受信のタイムアウト時にEOSを流し、
+        decoder/encoder内部に残ったフレームをdrainしてから計測完了
         """
+        measurement = None
+        basetime_task = None
         try:
             measurement = self.writer.create_measurement("Created by SummarizeService")
             logging.info(f"Created measurement: {measurement.uuid}")
@@ -115,7 +136,6 @@ class SummarizeService:
             )  # 要約結果データ取得
 
             await asyncio.gather(
-                basetime_task,
                 feed_task,
                 grid_task,
                 fetch_preview_task,
@@ -128,8 +148,12 @@ class SummarizeService:
         except asyncio.CancelledError:
             pass
         finally:
-            self.writer.complete_measurement(measurement.uuid)
-            logging.info(f"Completed measurement: {measurement.uuid}")
+            if basetime_task is not None:
+                basetime_task.cancel()
+                await asyncio.gather(basetime_task, return_exceptions=True)
+            if measurement is not None:
+                self.writer.complete_measurement(measurement.uuid)
+                logging.info(f"Completed measurement: {measurement.uuid}")
 
     async def feed_basetime(self, measurement_uuid: str) -> None:
         """
@@ -159,49 +183,90 @@ class SummarizeService:
 
         - 緯度経度・速度を集約
         - H.264データダウンストリーム
-        - メタデータキュー追加
-        - デコーダー入力
+        - 経過時間をPTSとして設定してデコーダー入力
+        - メタデータキュー追加（PTS経路の照合とfallback用）
         """
-        async for elapsed_time, name, payload in self.downstreamer.read(read_timeout):
-            logging.info(f"Read elapsed {elapsed_time} {name} {len(payload)} bytes")
-            if name == DOWN_DATA_NAME_H264:
-                await self.metadata_queue.put(elapsed_time)
-                await self.decoder.push(payload)
+        try:
+            async for elapsed_time, name, payload in self.downstreamer.read(
+                read_timeout
+            ):
+                logging.info(f"Read elapsed {elapsed_time} {name} {len(payload)} bytes")
+                if name == DOWN_DATA_NAME_H264:
+                    self.read_seq += 1
+                    await self.metadata_queue.put((self.read_seq, elapsed_time))
+                    await self.decoder.push(payload, pts=elapsed_time)
+        except TimeoutError:
+            logging.info("Downstream read timeout. Start decoder drain.")
+        finally:
+            logging.info(
+                "Trace feed_eos read_seq=%d metadata_q=%d preview_q=%d prompt_q=%d",
+                self.read_seq,
+                self.metadata_queue.qsize(),
+                self.elapsed_time_queue.qsize(),
+                self.prompt_queue.qsize(),
+            )
+            self.decoder.end_of_stream()
 
     async def grid(self) -> None:
         """
         グリッド配置
 
         - RAWデータ取得
-        - メタデータキュー取得
+        - デコードPTS取得
         - グリッド配置
         - グリッド更新
-          - 経過時間キュー追加
-          - プレビュー画像JPEGエンコーダ入力
+          - PTS付きプレビュー画像JPEGエンコーダ入力
         - グリッド完成
           - プロンプトキュー追加
-          - 要約対象画像JPEGエンコーダ入力
+          - PTS付き要約対象画像JPEGエンコーダ入力
         """
-        while True:
-            frame = await self.decoder.get()
-            elapsed_time = await self.metadata_queue.get()
+        try:
+            while True:
+                frame, pts, _, _ = await self.decoder.get_with_timing()
+                self.decoded_seq += 1
+                _, queued_elapsed_time = await self.metadata_queue.get()
+                elapsed_time = queued_elapsed_time
+                if pts != GST_CLOCK_TIME_NONE:
+                    elapsed_time = pts
+                if elapsed_time != queued_elapsed_time:
+                    logging.info(
+                        "Trace decoded_elapsed_mismatch decoded_seq=%d queued_elapsed_time=%d selected_elapsed_time=%d",
+                        self.decoded_seq,
+                        queued_elapsed_time,
+                        elapsed_time,
+                    )
 
-            absolute_time_unix_nano = self.basetime.unix_nano() + elapsed_time
-            absolute_time = iscp.DateTime.from_unix_nano(absolute_time_unix_nano)
-            image, filled = self.tiler.tile(frame, absolute_time.datetime)
+                absolute_time_unix_nano = self.basetime.unix_nano() + elapsed_time
+                absolute_time = iscp.DateTime.from_unix_nano(absolute_time_unix_nano)
+                image, filled = self.tiler.tile(frame, absolute_time.datetime)
 
-            if image:
-                logging.info("Updated Grid!")
-                await self.elapsed_time_queue.put(elapsed_time)
-                await self.encoder_preview.push(image)
+                if image:
+                    logging.info("Updated Grid!")
+                    self.preview_seq += 1
+                    await self.elapsed_time_queue.put(
+                        (self.preview_seq, elapsed_time)
+                    )
+                    await self.encoder_preview.push(image, pts=elapsed_time)
 
-                if filled:
-                    logging.info(f"Filled Grid! {self.prompt_queue.full()}")
-                    if self.prompt_queue.full():
-                        logging.info("Prompt queue is full!")
-                        continue
-                    await self.prompt_queue.put(elapsed_time)
-                    await self.encoder_summary.push(image)
+                    if filled:
+                        logging.info(f"Filled Grid! {self.prompt_queue.full()}")
+                        if self.prompt_queue.full():
+                            logging.info("Prompt queue is full!")
+                            continue
+                        await self.prompt_queue.put(elapsed_time)
+                        await self.encoder_summary.push(image, pts=elapsed_time)
+        except EOFError:
+            logging.info("Decoder drained. Start JPEG encoder drain.")
+        finally:
+            logging.info(
+                "Trace grid_eos decoded_seq=%d preview_seq=%d summary_q=%d",
+                self.decoded_seq,
+                self.preview_seq,
+                self.prompt_queue.qsize(),
+            )
+            self.encoder_preview.end_of_stream()
+            self.encoder_summary.end_of_stream()
+            await self.prompt_queue.put(None)
 
     async def fetch_preview(self) -> None:
         """
@@ -211,12 +276,33 @@ class SummarizeService:
         - プレビュー画像データアップストリーム
         """
 
-        while True:
-            frame = await self.encoder_preview.get()
-            elapsed_time = await self.elapsed_time_queue.get()
+        try:
+            while True:
+                frame, pts, _, _ = await self.encoder_preview.get_with_timing()
+                preview_seq, queued_elapsed_time = await self.elapsed_time_queue.get()
+                elapsed_time = queued_elapsed_time
+                if pts != GST_CLOCK_TIME_NONE:
+                    if self.preview_pts_offset is None:
+                        self.preview_pts_offset = pts - queued_elapsed_time
+                        logging.info(
+                            "Trace preview_pts_offset offset=%d first_encoded_pts=%d first_source_pts=%d",
+                            self.preview_pts_offset,
+                            pts,
+                            queued_elapsed_time,
+                        )
+                    elapsed_time = pts - self.preview_pts_offset
+                if elapsed_time != queued_elapsed_time:
+                    logging.info(
+                        "Trace preview_elapsed_mismatch preview_seq=%d queued_elapsed_time=%d selected_elapsed_time=%d",
+                        preview_seq,
+                        queued_elapsed_time,
+                        elapsed_time,
+                    )
 
-            await self.upstreamer.send_preview(elapsed_time, frame)
-            logging.info(f"Sent elapsed_time {elapsed_time} {len(frame)} bytes")
+                await self.upstreamer.send_preview(elapsed_time, frame)
+                logging.info(f"Sent elapsed_time {elapsed_time} {len(frame)} bytes")
+        except EOFError:
+            logging.info("Preview encoder drained.")
 
     async def summarize(self) -> None:
         """
@@ -227,16 +313,45 @@ class SummarizeService:
           - RateLimitをオーバーした場合はリトライせず、一定時間スリープ
         - 要約結果キュー追加
         """
-        while True:
-            elapsed_time = await self.prompt_queue.get()
-            frame = await self.encoder_summary.get()
+        try:
+            while True:
+                queued_elapsed_time = await self.prompt_queue.get()
+                if queued_elapsed_time is None:
+                    break
+                frame, pts, _, _ = await self.encoder_summary.get_with_timing()
+                self.summary_seq += 1
+                elapsed_time = queued_elapsed_time
+                if pts != GST_CLOCK_TIME_NONE:
+                    if self.summary_pts_offset is None:
+                        self.summary_pts_offset = pts - queued_elapsed_time
+                        logging.info(
+                            "Trace summary_pts_offset offset=%d first_encoded_pts=%d first_source_pts=%d",
+                            self.summary_pts_offset,
+                            pts,
+                            queued_elapsed_time,
+                        )
+                    elapsed_time = pts - self.summary_pts_offset
+                if elapsed_time != queued_elapsed_time:
+                    logging.info(
+                        "Trace summary_elapsed_mismatch summary_seq=%d queued_elapsed_time=%d selected_elapsed_time=%d",
+                        self.summary_seq,
+                        queued_elapsed_time,
+                        elapsed_time,
+                    )
 
-            try:
-                answer = await asyncio.to_thread(self.chatter.chat, frame)
-                await self.answer_queue.put((elapsed_time, json.dumps(answer), frame))
-            except RateLimitError as e:
-                logging.info(f"RateLimitError! {e}")
-                await asyncio.sleep(0.5)
+                try:
+                    answer = await asyncio.to_thread(self.chatter.chat, frame)
+                    await self.answer_queue.put(
+                        (elapsed_time, json.dumps(answer), frame)
+                    )
+                except RateLimitError as e:
+                    logging.info(f"RateLimitError! {e}")
+                    await asyncio.sleep(0.5)
+        except EOFError:
+            logging.info("Summary encoder reached EOS.")
+        finally:
+            logging.info("Summary encoder drained.")
+            await self.answer_queue.put((None, None, None))
 
     async def fetch_answer(self) -> None:
         """
@@ -249,6 +364,8 @@ class SummarizeService:
 
         while True:
             elapsed_time, answer, frame = await self.answer_queue.get()
+            if elapsed_time is None or answer is None or frame is None:
+                break
 
             await self.upstreamer.send_answer(elapsed_time, answer)
             await self.upstreamer.send_summary(elapsed_time, frame)
