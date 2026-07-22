@@ -35,8 +35,8 @@ TARGET_SIZE = 640, 480
 CONFIDENCE_THRESHOLD = 0.2
 
 FPS = 15
-BITRATE = 3000  # kbps
-KEY_INT_MAX = FPS * 2
+BITRATE = 6000  # kbps
+KEY_INT_MAX = FPS
 WEIGHTS_PATH = "./lesson4/config/yolov4-tiny.weights"
 CONFIG_PATH = "./lesson4/config/yolov4-tiny.cfg"
 NAMES_PATH = "./lesson4/config/coco.names"

@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import AsyncGenerator, Tuple
 
@@ -28,6 +29,8 @@ class Downstreamer:
         self.conn = conn
         self.edge_uuid = edge_uuid
         self.data_name = data_name
+        self.last_elapsed_time = None
+        self.upstream_closed = asyncio.Event()
 
     async def open(self) -> None:
         """
@@ -58,6 +61,11 @@ class Downstreamer:
         """
         async for metadata in self.down.metadatas():
             logging.info(f"Received Metadata: {metadata}")
+            if isinstance(
+                metadata.metadata,
+                (iscp.UpstreamNormalClose, iscp.UpstreamAbnormalClose),
+            ):
+                self.upstream_closed.set()
             if isinstance(metadata.metadata, iscp.BaseTime):
                 yield metadata.metadata
 
@@ -73,10 +81,67 @@ class Downstreamer:
         Yields:
             tuple(int, bytes): 受信したデータポイントの経過時間, ペイロード
         """
-        async for msg in self.down.chunks(timeout=timeout):
+        chunk_iter = self.down.chunks(timeout=timeout).__aiter__()
+        close_drain_timeout = 1.0
+        while True:
+            chunk_task = asyncio.create_task(chunk_iter.__anext__())
+            close_task = asyncio.create_task(self.upstream_closed.wait())
+            done, pending = await asyncio.wait(
+                {chunk_task, close_task},
+                return_when=asyncio.FIRST_COMPLETED,
+            )
+
+            if chunk_task in done:
+                close_task.cancel()
+                await asyncio.gather(close_task, return_exceptions=True)
+                try:
+                    msg = chunk_task.result()
+                except StopAsyncIteration:
+                    return
+            else:
+                try:
+                    msg = await asyncio.wait_for(
+                        chunk_task, timeout=close_drain_timeout
+                    )
+                except (asyncio.TimeoutError, StopAsyncIteration):
+                    logging.info(
+                        "Downstream source upstream closed. Stop reading chunks."
+                    )
+                    return
+
+            for task in pending:
+                task.cancel()
+
+            points = []
             for group in msg.data_point_groups:
                 for data_point in group.data_points:
-                    yield data_point.elapsed_time, data_point.payload
+                    points.append((data_point.elapsed_time, data_point.payload))
+
+            sorted_points = sorted(points, key=lambda point: point[0])
+            elapsed_times = [elapsed_time for elapsed_time, _ in points]
+            sorted_elapsed_times = [
+                elapsed_time for elapsed_time, _ in sorted_points
+            ]
+            if elapsed_times != sorted_elapsed_times:
+                logging.info(
+                    "Sorted downstream chunk by elapsed_time: before=%s after=%s",
+                    elapsed_times,
+                    sorted_elapsed_times,
+                )
+
+            for elapsed_time, payload in sorted_points:
+                if (
+                    self.last_elapsed_time is not None
+                    and elapsed_time < self.last_elapsed_time
+                ):
+                    logging.info(
+                        "Downstream elapsed_time is non-monotonic across chunks: previous=%d current=%d delta=%d",
+                        self.last_elapsed_time,
+                        elapsed_time,
+                        elapsed_time - self.last_elapsed_time,
+                    )
+                self.last_elapsed_time = elapsed_time
+                yield elapsed_time, payload
 
     async def close(self) -> None:
         """
