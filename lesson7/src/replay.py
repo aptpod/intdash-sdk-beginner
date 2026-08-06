@@ -110,7 +110,11 @@ async def main(
         dst_edge_uuid (str): 新計測データ エッジUUID
         speed (float): 再生スピード
     """
-    log_args = " ".join([f"{key}: {value}" for key, value in locals().items()])
+    log_args = " ".join(
+        f"{key}: {value}"
+        for key, value in locals().items()
+        if key not in {"src_api_token", "dst_api_token"}
+    )
     logging.info("Processing: " + log_args)
 
     conn: iscp.Conn | None = None
