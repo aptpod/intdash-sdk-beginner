@@ -113,6 +113,8 @@ async def main(
     log_args = " ".join([f"{key}: {value}" for key, value in locals().items()])
     logging.info("Processing: " + log_args)
 
+    conn: iscp.Conn | None = None
+    service: ReplayService | None = None
     try:
         conn = await connect(
             dst_api_url,
@@ -151,8 +153,13 @@ async def main(
     except Exception as e:
         logging.error(f"Exception occurred: {e}", exc_info=True)
     finally:
-        await service.close()
-        await conn.close()
+        if service is not None:
+            await service.close()
+        if conn is not None:
+            try:
+                await conn.close()
+            except iscp.ISCPTransportClosedError:
+                logging.info("Connection was already closed")
 
 
 if __name__ == "__main__":
